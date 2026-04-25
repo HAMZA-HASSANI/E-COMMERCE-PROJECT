@@ -1,0 +1,37 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ecommerce
+
+---
+# ConfigMap for environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+  namespace: ecommerce
+data:
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: ecommerce
+  PRODUCT_SERVICE_URL: http://product-service:3001
+  USER_SERVICE_URL: http://user-service:3002
+  ORDER_SERVICE_URL: http://order-service:3003
+  RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ecommerce-secret
+  namespace: ecommerce
+type: Opaque
+stringData:
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  JWT_SECRET: your-super-secret-key
+  RABBITMQ_USER: guest
+  RABBITMQ_PASSWORD: guest
