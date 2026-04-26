@@ -1,0 +1,261 @@
+# Default values for chart_helem_citoyen_openrouter
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: citoyen.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+          servicePort: 80
+        - path: /api
+          pathType: Prefix
+          service: backend
+          servicePort: 3000
+        - path: /grafana
+          pathType: Prefix
+          service: grafana
+          servicePort: 80
+        - path: /prometheus
+          pathType: Prefix
+          service: prometheus
+          servicePort: 9090
+        - path: /loki
+          pathType: Prefix
+          service: loki
+          servicePort: 3100
+  tls: []
+  #  - secretName: chart-helm-citoyen-tls
+  #    hosts:
+  #      - citoyen.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.'
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Application configuration
+app:
+  name: citoyen-marocain-guide
+  env:
+    NODE_ENV: production
+    PORT: 3000
+    DB_HOST: postgres
+    DB_PORT: 5432
+    DB_NAME: citoyen_db
+    DB_USER: citoyen_user
+    DB_PASSWORD:changeme
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    JWT_SECRET: changeme_jwt_secret
+    JWT_EXPIRES_IN: 24h
+
+# Backend configuration
+backend:
+  image: node:18-alpine
+  repository: ghcr.io/your-org/citoyen-marocain-backend
+  tag: latest
+  port: 3000
+  replicas: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  livenessProbe:
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    path: /health
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Frontend configuration
+frontend:
+  image: nginx:alpine
+  repository: ghcr.io/your-org/citoyen-marocain-frontend
+  tag: latest
+  port: 80
+  replicas: 1
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# PostgreSQL configuration
+postgres:
+  image: postgres:15-alpine
+  repository: postgres
+  tag: 15-alpine
+  port: 5432
+  replicas: 1
+  database: citoyen_db
+  username: citoyen_user
+  password: changeme
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: standard
+
+# Redis configuration
+redis:
+  image: redis:7-alpine
+  repository: redis
+  tag: 7-alpine
+  port: 6379
+  replicas: 1
+  password: changeme
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: standard
+
+# Prometheus configuration
+prometheus:
+  enabled: true
+  image: prom/prometheus:latest
+  repository: prom/prometheus
+  tag: latest
+  port: 9090
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClass: standard
+
+# Grafana configuration
+grafana:
+  enabled: true
+  image: grafana/grafana:latest
+  repository: grafana/grafana
+  tag: latest
+  port: 80
+  adminUser: admin
+  adminPassword: admin
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: standard
+
+# Loki configuration
+loki:
+  enabled: true
+  image: grafana/loki:latest
+  repository: grafana/loki
+  tag: latest
+  port: 3100
+  resources:
+    limits:
+      cpu: 300m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: standard
+
+# Ingress NGINX configuration
+ingressnginx:
+  enabled: true
+  image: registry.k8s.io/ingress-nginx/controller:v1.9.0
+  repository: registry.k8s.io/ingress-nginx/controller
+  tag: v1.9.0
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
