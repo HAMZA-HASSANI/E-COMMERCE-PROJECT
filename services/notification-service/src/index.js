@@ -9,6 +9,22 @@ const HEALTH_PORT = process.env.HEALTH_PORT || 3004;
 
 const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672';
 
+// ─── PROMETHEUS METRICS ─────────────────────────────────────────────────────────────
+const collectDefaultMetrics = promClient.collectDefaultMetrics;
+collectDefaultMetrics({ prefix: 'notification_service_' });
+
+const notificationsSent = new promClient.Counter({
+  name: 'notification_service_emails_sent_total',
+  help: 'Total number of notification emails sent',
+  labelNames: ['event_type']
+});
+
+const notificationsFailed = new promClient.Counter({
+  name: 'notification_service_emails_failed_total',
+  help: 'Total number of failed notification emails',
+  labelNames: ['event_type']
+});
+
 // Database connection to fetch real user info
 const pool = new Pool({
   user: process.env.DB_USER || 'postgres',
@@ -178,22 +194,6 @@ async function start() {
     setTimeout(start, 5000);
   }
 }
-
-// ─── PROMETHEUS METRICS ─────────────────────────────────────────────────────────────
-const collectDefaultMetrics = promClient.collectDefaultMetrics;
-collectDefaultMetrics({ prefix: 'notification_service_' });
-
-const notificationsSent = new promClient.Counter({
-  name: 'notification_service_emails_sent_total',
-  help: 'Total number of notification emails sent',
-  labelNames: ['event_type']
-});
-
-const notificationsFailed = new promClient.Counter({
-  name: 'notification_service_emails_failed_total',
-  help: 'Total number of failed notification emails',
-  labelNames: ['event_type']
-});
 
 // ─── HEALTH & METRICS HTTP SERVER ───────────────────────────────────────────────
 const healthApp = express();

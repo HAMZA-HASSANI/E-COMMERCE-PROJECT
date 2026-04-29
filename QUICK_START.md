@@ -19,6 +19,7 @@ Switches :
 Exemple **tout-en-un** (build + déploiement + port-forwards) :
 ```powershell
 .\scripts\start-platform.ps1 -PortForward
+.\scripts\start-platform.ps1 -WithLoad -PortForward
 ```
 Pour relancer rapidement après un premier build :
 ```powershell
@@ -222,6 +223,13 @@ kubectl logs -n ecommerce -l app=product-service -f
 ```
 *Composants disponibles : `api-gateway`, `product-service`, `user-service`, `order-service`, `notification-service`, `prometheus`, `grafana`, `alertmanager`, `node-exporter`, `postgres-exporter`, `redis-exporter`, `rabbitmq`, `postgres`, `redis`, `mailhog`.*
 
+kubectl logs -n ecommerce -l app=postgres -f
+kubectl logs -n ecommerce -l app=api-gateway -f
+kubectl logs -n ecommerce -l app=product-service -f
+kubectl logs -n ecommerce -l app=notification-service -f
+kubectl logs -n ecommerce -l app=alertmanager -f
+kubectl logs -n ecommerce -l app=mailhog -f
+
 ### Comprendre un crash de pod
 ```powershell
 kubectl describe pod -n ecommerce -l app=rabbitmq
@@ -230,7 +238,7 @@ kubectl logs -n ecommerce -l app=rabbitmq --previous
 
 ### Accès direct PostgreSQL
 ```powershell
-kubectl exec -it deployment/postgres -n ecommerce -- psql -U postgres -d ecommerce
+kubectl exec -it deployment/postgres -n ecommerce -- psql -U postgres -d ecommerce -c "select * from users LIMIT 10;"
 ```
 
 ### Scaling

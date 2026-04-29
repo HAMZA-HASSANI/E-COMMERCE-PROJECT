@@ -144,7 +144,7 @@ app.post('/', async (req, res) => {
 
     for (const item of items) {
       const productResult = await client.query(
-        'SELECT id, name, price, stock FROM products WHERE id = $1',
+        'SELECT id, name, price, stock FROM products WHERE id = $1 FOR UPDATE',
         [item.productId]
       );
 

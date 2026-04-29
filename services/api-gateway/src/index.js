@@ -38,8 +38,9 @@ const authFailures = new promClient.Counter({
   help: 'Total number of authentication failures'
 });
 
-// Redis client for rate limiting
+// Redis client for rate limiting and JWT caching
 const REDIS_URL = process.env.REDIS_URL || 'redis://redis:6379';
+const JWT_CACHE_TTL = parseInt(process.env.JWT_CACHE_TTL || '60', 10); // seconds
 let redisClient;
 
 async function connectRedis() {
@@ -55,6 +56,9 @@ async function connectRedis() {
 }
 
 connectRedis();
+
+// Trust the first proxy (load balancer / ingress) so req.ip reflects the real client IP
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet());
@@ -143,7 +147,25 @@ async function jwtAuth(req, res, next) {
 
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    authFailures.inc();
     return res.status(401).json({ error: 'Authentication required. Please provide a valid Bearer token.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  // Short-circuit: check Redis JWT cache before calling user-service
+  if (redisClient) {
+    try {
+      const cached = await redisClient.get(`gw:jwt:${token}`);
+      if (cached) {
+        const user = JSON.parse(cached);
+        req.headers['x-user-id'] = String(user.userId || user.id);
+        req.headers['x-user-email'] = user.email;
+        return next();
+      }
+    } catch (err) {
+      console.error('JWT cache lookup error:', err.message);
+    }
   }
 
   try {
@@ -154,15 +176,27 @@ async function jwtAuth(req, res, next) {
     });
 
     if (response.data && response.data.valid) {
-      // Attach user info to request headers for downstream services
-      req.headers['x-user-id'] = String(response.data.user.userId || response.data.user.id);
-      req.headers['x-user-email'] = response.data.user.email;
+      const user = response.data.user;
+      req.headers['x-user-id'] = String(user.userId || user.id);
+      req.headers['x-user-email'] = user.email;
+
+      // Cache the validated token for JWT_CACHE_TTL seconds
+      if (redisClient) {
+        try {
+          await redisClient.setEx(`gw:jwt:${token}`, JWT_CACHE_TTL, JSON.stringify(user));
+        } catch (err) {
+          console.error('JWT cache set error:', err.message);
+        }
+      }
+
       next();
     } else {
+      authFailures.inc();
       res.status(401).json({ error: 'Invalid or expired token' });
     }
   } catch (err) {
     if (err.response && err.response.status === 401) {
+      authFailures.inc();
       return res.status(401).json({ error: 'Invalid or expired token' });
     }
     console.error('Token validation error:', err.message);
