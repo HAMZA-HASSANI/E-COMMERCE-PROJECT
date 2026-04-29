@@ -1,0 +1,113 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"content": "## 50 — Business KPIs\n**Commandes** (créées, taux) · **Emails** (envoyés/échoués, taux livraison) · **Cache catalogue** (hit ratio) · **Activité services**\n**Audience**: Product / Direction · **Refresh**: 5m · **Fenêtre**: 24h", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 2}, "id": 2,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(increase(order_service_orders_created_total[$__range]))", "legendFormat": "Commandes", "refId": "A"}],
+      "title": "Commandes créées (période)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 2}, "id": 3,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(increase(notification_service_emails_sent_total[$__range]))", "legendFormat": "Emails", "refId": "A"}],
+      "title": "Emails envoyés (période)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.80}, {"color": "green", "value": 0.95}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 2}, "id": 4,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rate(notification_service_emails_sent_total[$__rate_interval])) / clamp_min(sum(rate(notification_service_emails_sent_total[$__rate_interval])) + sum(rate(notification_service_emails_failed_total[$__rate_interval])), 0.001)", "legendFormat": "Taux livraison", "refId": "A"}],
+      "title": "Taux livraison email (obj >95%)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.60}, {"color": "green", "value": 0.80}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 2}, "id": 5,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rate(product_service_cache_hits_total[$__rate_interval])) / clamp_min(sum(rate(product_service_cache_hits_total[$__rate_interval])) + sum(rate(product_service_cache_misses_total[$__rate_interval])), 0.001)", "legendFormat": "Cache hit ratio", "refId": "A"}],
+      "title": "Cache hit ratio catalogue (obj >80%)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 2}, "id": 6,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(increase(user_service_http_requests_total{status_code=\"201\", route=~\"/register\"}[$__range]))", "legendFormat": "Inscriptions", "refId": "A"}],
+      "title": "Inscriptions utilisateurs (période)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "reqps", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 2}, "id": 7,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rate(api_gateway_http_requests_total[$__rate_interval]))", "legendFormat": "req/s global", "refId": "A"}],
+      "title": "Trafic global (req/s)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 15, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}, "id": 8,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max", "sum"]}},
+      "targets": [{"expr": "sum(rate(order_service_orders_created_total[$__rate_interval]))", "legendFormat": "Commandes/s", "refId": "A"}],
+      "title": "Taux création commandes", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}, "id": 9,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "sum by (event_type) (rate(notification_service_emails_sent_total[$__rate_interval]))", "legendFormat": "Envoyés — {{event_type}}", "refId": "A"},
+        {"expr": "sum by (event_type) (rate(notification_service_emails_failed_total[$__rate_interval]))", "legendFormat": "Échoués — {{event_type}}", "refId": "B"}
+      ],
+      "title": "Emails par event type (envoyés vs échoués)", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "percentunit"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14}, "id": 10,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "lastNotNull"]}},
+      "targets": [{"expr": "sum(rate(product_service_cache_hits_total[$__rate_interval])) / clamp_min(sum(rate(product_service_cache_hits_total[$__rate_interval])) + sum(rate(product_service_cache_misses_total[$__rate_interval])), 0.001)", "legendFormat": "Cache hit ratio", "refId": "A"}],
+      "title": "Cache hit ratio catalogue (alerte <50%)", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "reqps"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14}, "id": 11,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "sum(rate(product_service_http_requests_total[$__rate_interval]))", "legendFormat": "Catalogue", "refId": "A"},
+        {"expr": "sum(rate(order_service_http_requests_total[$__rate_interval]))", "legendFormat": "Orders", "refId": "B"},
+        {"expr": "sum(rate(user_service_http_requests_total[$__rate_interval]))", "legendFormat": "Users", "refId": "C"}
+      ],
+      "title": "Activité par service (funnel simplifié)", "type": "timeseries"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "tags": ["ecommerce", "business", "kpi"],
+  "templating": {"list": [{"current": {}, "hide": 0, "name": "datasource", "query": "prometheus", "refresh": 1, "type": "datasource", "label": "Datasource"}]},
+  "time": {"from": "now-24h", "to": "now"},
+  "timezone": "browser",
+  "title": "50 — Business KPIs",
+  "uid": "ecomm-business-kpis",
+  "version": 1
+}

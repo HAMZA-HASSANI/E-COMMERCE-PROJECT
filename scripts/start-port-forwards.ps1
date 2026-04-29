@@ -60,7 +60,14 @@ foreach ($f in $forwards) {
     }
 
     $title = "pf:$($f.Svc) $($f.Local)->$($f.Remote)"
-    $cmd   = "`$Host.UI.RawUI.WindowTitle = '$title'; kubectl port-forward svc/$($f.Svc) $($f.Local):$($f.Remote) -n $Namespace"
+    # Boucle de reconnexion automatique : relance le port-forward si kubectl s'arrete
+    $cmd = @"
+`$Host.UI.RawUI.WindowTitle = '$title'
+while (`$true) {
+    kubectl port-forward svc/$($f.Svc) $($f.Local):$($f.Remote) -n $Namespace
+    Start-Sleep -Seconds 2
+}
+"@
     $windowStyle = if ($ShowWindows) { "Minimized" } else { "Hidden" }
 
     Start-Process -FilePath "powershell.exe" `

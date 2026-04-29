@@ -1,0 +1,126 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"content": "## 33 — RabbitMQ · Queues · Throughput · Consumers\n**Queue depth** (notification_queue) · **Throughput** (publish/deliver/ack) · **Consumers** · **Connexions**\n**Source**: rabbitmq_prometheus plugin (port 15692) · **Refresh**: 30s", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [{"options": {"0": {"color": "red", "text": "DOWN"}, "1": {"color": "green", "text": "UP"}}, "type": "value"}], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 2}, "id": 2,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "value_and_name"},
+      "targets": [{"expr": "up{job=\"rabbitmq\"}", "legendFormat": "RabbitMQ", "refId": "A"}],
+      "title": "Status", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 50}, {"color": "red", "value": 100}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 2}, "id": 3,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "rabbitmq_connections", "legendFormat": "Connexions", "refId": "A"}],
+      "title": "Connexions actives", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 100}, {"color": "red", "value": 200}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 2}, "id": 4,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "rabbitmq_channels", "legendFormat": "Channels", "refId": "A"}],
+      "title": "Channels ouverts", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 100}, {"color": "red", "value": 1000}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 2}, "id": 5,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rabbitmq_queue_messages_ready)", "legendFormat": "Messages prêts", "refId": "A"}],
+      "title": "Messages prêts (toutes queues)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 10}, {"color": "red", "value": 50}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 2}, "id": 6,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rabbitmq_queue_messages_unacked)", "legendFormat": "Non acquittés", "refId": "A"}],
+      "title": "Messages non acquittés", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "bytes",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 500000000}, {"color": "red", "value": 900000000}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 2}, "id": 7,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "rabbitmq_process_resident_memory_bytes", "legendFormat": "Mémoire", "refId": "A"}],
+      "title": "Mémoire processus", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 15, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}, "id": 8,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "rabbitmq_queue_messages_ready{queue=\"notification_queue\"}", "legendFormat": "Prêts", "refId": "A"},
+        {"expr": "rabbitmq_queue_messages_unacked{queue=\"notification_queue\"}", "legendFormat": "Non acquittés", "refId": "B"}
+      ],
+      "title": "Profondeur notification_queue (alerte >1000)", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "ops"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}, "id": 9,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "sum(rate(rabbitmq_channel_messages_published_total[$__rate_interval]))", "legendFormat": "Publish/s", "refId": "A"},
+        {"expr": "sum(rate(rabbitmq_channel_messages_delivered_ack_total[$__rate_interval]))", "legendFormat": "Deliver/s", "refId": "B"},
+        {"expr": "sum(rate(rabbitmq_channel_messages_acked_total[$__rate_interval]))", "legendFormat": "Ack/s", "refId": "C"},
+        {"expr": "sum(rate(rabbitmq_channel_messages_redelivered_total[$__rate_interval]))", "legendFormat": "Redeliver/s", "refId": "D"}
+      ],
+      "title": "Throughput messages (publish / deliver / ack / redeliver)", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14}, "id": 10,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "lastNotNull"]}},
+      "targets": [
+        {"expr": "rabbitmq_queue_consumers", "legendFormat": "Consumers — {{queue}}", "refId": "A"}
+      ],
+      "title": "Consumers par queue", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14}, "id": 11,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "rabbitmq_connections", "legendFormat": "Connexions", "refId": "A"},
+        {"expr": "rabbitmq_channels", "legendFormat": "Channels", "refId": "B"}
+      ],
+      "title": "Connexions et channels", "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["ecommerce", "messaging", "rabbitmq"],
+  "templating": {
+    "list": [
+      {"current": {}, "hide": 0, "name": "datasource", "query": "prometheus", "refresh": 1, "type": "datasource", "label": "Datasource"}
+    ]
+  },
+  "time": {"from": "now-1h", "to": "now"},
+  "timezone": "browser",
+  "title": "33 — RabbitMQ",
+  "uid": "ecomm-rabbitmq",
+  "version": 1
+}

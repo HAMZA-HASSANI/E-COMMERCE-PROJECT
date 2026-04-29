@@ -1,0 +1,128 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"content": "## 31 — PostgreSQL · Méthode USE\n**Utilization** (connexions, cache hit) · **Saturation** (locks, connexions max) · **Errors** (rollbacks, erreurs exporter)\n**Source**: postgres_exporter · **Refresh**: 30s", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [{"options": {"0": {"color": "red", "text": "DOWN"}, "1": {"color": "green", "text": "UP"}}, "type": "value"}], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 2}, "id": 2,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "value_and_name"},
+      "targets": [{"expr": "pg_up", "legendFormat": "PostgreSQL", "refId": "A"}],
+      "title": "Status", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 50}, {"color": "red", "value": 80}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 2}, "id": 3,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(pg_stat_activity_count{datname=\"ecommerce\"})", "legendFormat": "Connexions actives", "refId": "A"}],
+      "title": "Connexions actives", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.70}, {"color": "red", "value": 0.85}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 2}, "id": 4,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(pg_stat_activity_count{datname=\"ecommerce\"}) / pg_settings_max_connections", "legendFormat": "Utilisation pool", "refId": "A"}],
+      "title": "Saturation connexions", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.90}, {"color": "green", "value": 0.99}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 2}, "id": 5,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rate(pg_stat_database_blks_hit{datname=\"ecommerce\"}[$__rate_interval])) / clamp_min(sum(rate(pg_stat_database_blks_hit{datname=\"ecommerce\"}[$__rate_interval])) + sum(rate(pg_stat_database_blks_read{datname=\"ecommerce\"}[$__rate_interval])), 0.001)", "legendFormat": "Buffer cache hit ratio", "refId": "A"}],
+      "title": "Cache hit ratio (objectif >99%)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 5}, {"color": "red", "value": 20}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 2}, "id": 6,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(pg_locks_count{datname=\"ecommerce\"})", "legendFormat": "Locks actifs", "refId": "A"}],
+      "title": "Locks actifs", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 2}, "id": 7,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "pg_exporter_last_scrape_error", "legendFormat": "Erreur exporter", "refId": "A"}],
+      "title": "Erreur exporter", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 15, "lineWidth": 2}, "unit": "ops"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}, "id": 8,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "sum(rate(pg_stat_database_xact_commit{datname=\"ecommerce\"}[$__rate_interval]))", "legendFormat": "Commits/s", "refId": "A"},
+        {"expr": "sum(rate(pg_stat_database_xact_rollback{datname=\"ecommerce\"}[$__rate_interval]))", "legendFormat": "Rollbacks/s", "refId": "B"}
+      ],
+      "title": "Transactions / s (commits vs rollbacks)", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "ops"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}, "id": 9,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "sum(rate(pg_stat_database_tup_fetched{datname=\"ecommerce\"}[$__rate_interval]))", "legendFormat": "SELECT (fetch)", "refId": "A"},
+        {"expr": "sum(rate(pg_stat_database_tup_inserted{datname=\"ecommerce\"}[$__rate_interval]))", "legendFormat": "INSERT", "refId": "B"},
+        {"expr": "sum(rate(pg_stat_database_tup_updated{datname=\"ecommerce\"}[$__rate_interval]))", "legendFormat": "UPDATE", "refId": "C"},
+        {"expr": "sum(rate(pg_stat_database_tup_deleted{datname=\"ecommerce\"}[$__rate_interval]))", "legendFormat": "DELETE", "refId": "D"}
+      ],
+      "title": "Tuples / s par opération", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14}, "id": 10,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "sum(pg_stat_activity_count{datname=\"ecommerce\", state=\"active\"})", "legendFormat": "Active", "refId": "A"},
+        {"expr": "sum(pg_stat_activity_count{datname=\"ecommerce\", state=\"idle\"})", "legendFormat": "Idle", "refId": "B"},
+        {"expr": "sum(pg_stat_activity_count{datname=\"ecommerce\", state=\"idle in transaction\"})", "legendFormat": "Idle in txn", "refId": "C"}
+      ],
+      "title": "Connexions par état", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "ops"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14}, "id": 11,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "sum(rate(pg_stat_database_blks_hit{datname=\"ecommerce\"}[$__rate_interval]))", "legendFormat": "Buffer hits/s (RAM)", "refId": "A"},
+        {"expr": "sum(rate(pg_stat_database_blks_read{datname=\"ecommerce\"}[$__rate_interval]))", "legendFormat": "Disk reads/s", "refId": "B"}
+      ],
+      "title": "I/O — Buffer hits vs disk reads/s", "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["ecommerce", "database", "postgresql"],
+  "templating": {
+    "list": [
+      {"current": {}, "hide": 0, "name": "datasource", "query": "prometheus", "refresh": 1, "type": "datasource", "label": "Datasource"}
+    ]
+  },
+  "time": {"from": "now-1h", "to": "now"},
+  "timezone": "browser",
+  "title": "31 — PostgreSQL",
+  "uid": "ecomm-postgresql",
+  "version": 1
+}

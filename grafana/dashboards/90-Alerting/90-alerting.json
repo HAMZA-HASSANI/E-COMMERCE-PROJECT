@@ -1,0 +1,131 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"content": "## 90 — Alerting Overview\n**Alertes actives** · **Historique 24h/7j** · **Par sévérité** · État Alertmanager\n**Datasource**: Prometheus + Alertmanager · **Refresh**: 30s · **Audience**: SRE / Oncall", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 0, "y": 2}, "id": 2,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)", "legendFormat": "Alertes actives", "refId": "A"}],
+      "title": "Alertes FIRING", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 4, "y": 2}, "id": 3,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"}) or vector(0)", "legendFormat": "Critical", "refId": "A"}],
+      "title": "Alertes CRITICAL", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 8, "y": 2}, "id": 4,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "count(ALERTS{alertstate=\"firing\", severity=\"warning\"}) or vector(0)", "legendFormat": "Warning", "refId": "A"}],
+      "title": "Alertes WARNING", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 12, "y": 2}, "id": 5,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "count(ALERTS{alertstate=\"pending\"}) or vector(0)", "legendFormat": "Pending", "refId": "A"}],
+      "title": "Alertes PENDING", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 16, "y": 2}, "id": 6,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "sum(alertmanager_alerts{state=\"suppressed\"}) or vector(0)", "legendFormat": "Inhibées", "refId": "A"}],
+      "title": "Alertes inhibées (Alertmanager)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [{"options": {"0": {"color": "red", "text": "DOWN"}, "1": {"color": "green", "text": "UP"}}, "type": "value"}], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 4, "x": 20, "y": 2}, "id": 7,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "value_and_name"},
+      "targets": [{"expr": "up{job=\"alertmanager\"}", "legendFormat": "Alertmanager", "refId": "A"}],
+      "title": "Status Alertmanager", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 15, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}, "id": 8,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["max", "sum"]}},
+      "targets": [
+        {"expr": "count by (severity) (ALERTS{alertstate=\"firing\"}) or vector(0)", "legendFormat": "{{severity}}", "refId": "A"}
+      ],
+      "title": "Alertes firing par sévérité", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}, "id": 9,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["max", "sum"]}},
+      "targets": [
+        {"expr": "count by (category) (ALERTS{alertstate=\"firing\"}) or vector(0)", "legendFormat": "{{category}}", "refId": "A"}
+      ],
+      "title": "Alertes firing par catégorie", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 14}, "id": 10,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["max", "sum"]}},
+      "targets": [
+        {"expr": "count by (alertname) (ALERTS{alertstate=\"firing\"})", "legendFormat": "{{alertname}}", "refId": "A"}
+      ],
+      "title": "Alertes firing par règle (top alertes — à dé-bruiter si récurrentes)", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22}, "id": 11,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["sum"]}},
+      "targets": [
+        {"expr": "rate(alertmanager_notifications_total[$__rate_interval])", "legendFormat": "Notifications — {{integration}}", "refId": "A"}
+      ],
+      "title": "Notifications Alertmanager envoyées / s", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22}, "id": 12,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["sum"]}},
+      "targets": [
+        {"expr": "rate(alertmanager_notifications_failed_total[$__rate_interval])", "legendFormat": "Échecs — {{integration}}", "refId": "A"}
+      ],
+      "title": "Notifications en échec / s (email, slack…)", "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["ecommerce", "alerting", "alertmanager"],
+  "templating": {
+    "list": [
+      {"current": {}, "hide": 0, "name": "datasource", "query": "prometheus", "refresh": 1, "type": "datasource", "label": "Datasource"}
+    ]
+  },
+  "time": {"from": "now-24h", "to": "now"},
+  "timezone": "browser",
+  "title": "90 — Alerting Overview",
+  "uid": "ecomm-alerting",
+  "version": 1
+}

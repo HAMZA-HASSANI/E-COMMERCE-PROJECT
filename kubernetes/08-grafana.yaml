@@ -43,16 +43,86 @@ data:
   dashboards.yml: |
     apiVersion: 1
     providers:
-      - name: 'ecommerce-dashboards'
+      - name: '00-platform-overview'
         orgId: 1
-        folder: 'Ecommerce Platform'
+        folder: '00 - Platform Overview'
         type: file
         disableDeletion: false
         editable: true
         updateIntervalSeconds: 30
         allowUiUpdates: true
         options:
-          path: /var/lib/grafana/dashboards
+          path: /var/lib/grafana/dashboards/00-Platform-Overview
+      - name: '10-api-gateway'
+        orgId: 1
+        folder: '10 - API Gateway'
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/10-API-Gateway
+      - name: '20-services'
+        orgId: 1
+        folder: '20 - Services'
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/20-Services
+      - name: '30-data-layer'
+        orgId: 1
+        folder: '30 - Data Layer'
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/30-Data-Layer
+      - name: '40-infrastructure'
+        orgId: 1
+        folder: '40 - Infrastructure'
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/40-Infrastructure
+      - name: '50-business-kpis'
+        orgId: 1
+        folder: '50 - Business KPIs'
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/50-Business-KPIs
+      - name: '60-slo'
+        orgId: 1
+        folder: '60 - SLO / SLA'
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/60-SLO
+      - name: '90-alerting'
+        orgId: 1
+        folder: '90 - Alerting'
+        type: file
+        disableDeletion: false
+        editable: true
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards/90-Alerting
 
 ---
 # Grafana PVC
@@ -76,6 +146,8 @@ metadata:
   namespace: ecommerce
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: grafana
@@ -112,8 +184,22 @@ spec:
           mountPath: /etc/grafana/provisioning/datasources
         - name: grafana-dashboard-provider
           mountPath: /etc/grafana/provisioning/dashboards
-        - name: grafana-dashboards
-          mountPath: /var/lib/grafana/dashboards
+        - name: grafana-dashboards-00
+          mountPath: /var/lib/grafana/dashboards/00-Platform-Overview
+        - name: grafana-dashboards-10
+          mountPath: /var/lib/grafana/dashboards/10-API-Gateway
+        - name: grafana-dashboards-20
+          mountPath: /var/lib/grafana/dashboards/20-Services
+        - name: grafana-dashboards-30
+          mountPath: /var/lib/grafana/dashboards/30-Data-Layer
+        - name: grafana-dashboards-40
+          mountPath: /var/lib/grafana/dashboards/40-Infrastructure
+        - name: grafana-dashboards-50
+          mountPath: /var/lib/grafana/dashboards/50-Business-KPIs
+        - name: grafana-dashboards-60
+          mountPath: /var/lib/grafana/dashboards/60-SLO
+        - name: grafana-dashboards-90
+          mountPath: /var/lib/grafana/dashboards/90-Alerting
         readinessProbe:
           httpGet: { path: /api/health, port: 3000 }
           initialDelaySeconds: 20
@@ -135,9 +221,37 @@ spec:
       - name: grafana-dashboard-provider
         configMap:
           name: grafana-dashboard-provider
-      - name: grafana-dashboards
+      - name: grafana-dashboards-00
         configMap:
-          name: grafana-dashboards
+          name: grafana-dashboards-00-platform-overview
+          optional: true
+      - name: grafana-dashboards-10
+        configMap:
+          name: grafana-dashboards-10-api-gateway
+          optional: true
+      - name: grafana-dashboards-20
+        configMap:
+          name: grafana-dashboards-20-services
+          optional: true
+      - name: grafana-dashboards-30
+        configMap:
+          name: grafana-dashboards-30-data-layer
+          optional: true
+      - name: grafana-dashboards-40
+        configMap:
+          name: grafana-dashboards-40-infrastructure
+          optional: true
+      - name: grafana-dashboards-50
+        configMap:
+          name: grafana-dashboards-50-business-kpis
+          optional: true
+      - name: grafana-dashboards-60
+        configMap:
+          name: grafana-dashboards-60-slo
+          optional: true
+      - name: grafana-dashboards-90
+        configMap:
+          name: grafana-dashboards-90-alerting
           optional: true
 
 ---

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($r = Invoke-RestMethod \"http://localhost:9090/api/v1/label/__name__/values\"; $names = $r.data | Where-Object { $_ -match \"^\\(pg_|redis_|rabbitmq_|notification_service_\\)\" }; $names | Sort-Object)"
+    ]
+  }
+}

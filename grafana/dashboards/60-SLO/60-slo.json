@@ -1,0 +1,162 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"content": "## 60 — SLO / SLA · Error Budget\n**SLI 1** Disponibilité >99.9% · **SLI 2** p95 latence API Gateway <500ms · **SLI 3** Taux erreur 5xx <1%\n**Fenêtre**: 30j glissants · **Refresh**: 5m · **Audience**: SRE / Management", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 2},
+      "id": 100,
+      "options": {"content": "### SLI 1 — Disponibilité des services (objectif 99.9%)", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0.99, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.999}, {"color": "green", "value": 0.9999}]}}},
+      "gridPos": {"h": 5, "w": 4, "x": 0, "y": 4}, "id": 2,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "avg_over_time(up{job=\"api-gateway\"}[30d])", "legendFormat": "API Gateway", "refId": "A"}],
+      "title": "Dispo API Gateway (30j)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0.99, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.999}, {"color": "green", "value": 0.9999}]}}},
+      "gridPos": {"h": 5, "w": 4, "x": 4, "y": 4}, "id": 3,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "avg_over_time(up{job=\"product-service\"}[30d])", "legendFormat": "Product Service", "refId": "A"}],
+      "title": "Dispo Product (30j)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0.99, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.999}, {"color": "green", "value": 0.9999}]}}},
+      "gridPos": {"h": 5, "w": 4, "x": 8, "y": 4}, "id": 4,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "avg_over_time(up{job=\"user-service\"}[30d])", "legendFormat": "User Service", "refId": "A"}],
+      "title": "Dispo User (30j)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0.99, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.999}, {"color": "green", "value": 0.9999}]}}},
+      "gridPos": {"h": 5, "w": 4, "x": 12, "y": 4}, "id": 5,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "avg_over_time(up{job=\"order-service\"}[30d])", "legendFormat": "Order Service", "refId": "A"}],
+      "title": "Dispo Order (30j)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 0.001,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.0005}, {"color": "red", "value": 0.001}]}}},
+      "gridPos": {"h": 5, "w": 8, "x": 16, "y": 4}, "id": 6,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "1 - avg_over_time(up{job=\"api-gateway\"}[30d])", "legendFormat": "Budget consommé API GW", "refId": "A"}],
+      "title": "Error budget API GW consommé (max 0.1%)", "type": "stat"
+    },
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 9},
+      "id": 101,
+      "options": {"content": "### SLI 2 — Latence p95 API Gateway (objectif <500ms)", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "s",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.3}, {"color": "red", "value": 0.5}]}}},
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 11}, "id": 7,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "histogram_quantile(0.95, sum(rate(api_gateway_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95 actuel", "refId": "A"}],
+      "title": "p95 latence actuelle (SLO <500ms)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "s",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.3}, {"color": "red", "value": 1}]}}},
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 11}, "id": 8,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "histogram_quantile(0.99, sum(rate(api_gateway_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99 actuel", "refId": "A"}],
+      "title": "p99 latence actuelle", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "s",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.3}, {"color": "red", "value": 0.5}]}}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 11}, "id": 9,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, sum(rate(api_gateway_http_request_duration_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum(rate(api_gateway_http_request_duration_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p95 (SLO <500ms)", "refId": "B"},
+        {"expr": "histogram_quantile(0.99, sum(rate(api_gateway_http_request_duration_seconds_bucket[$__rate_interval])) by (le))", "legendFormat": "p99", "refId": "C"}
+      ],
+      "title": "Latence API Gateway p50/p95/p99", "type": "timeseries"
+    },
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 19},
+      "id": 102,
+      "options": {"content": "### SLI 3 — Taux d'erreur 5xx (objectif <1%) + Burn rate", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 0.05,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.005}, {"color": "red", "value": 0.01}]}}},
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 21}, "id": 10,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "job:http_error_ratio_5xx:ratio5m{job=\"api-gateway\"}", "legendFormat": "5xx API Gateway", "refId": "A"}],
+      "title": "Taux 5xx API Gateway (SLO <1%)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 0.05,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.005}, {"color": "red", "value": 0.01}]}}},
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 21}, "id": 11,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}, "textMode": "auto"},
+      "targets": [{"expr": "job:http_error_ratio_5xx:ratio5m{job=\"order-service\"}", "legendFormat": "5xx Order Service", "refId": "A"}],
+      "title": "Taux 5xx Order Service (SLO <1%)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "percentunit"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21}, "id": 12,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "job:http_error_ratio_5xx:ratio5m", "legendFormat": "5xx — {{job}}", "refId": "A"},
+        {"expr": "job:http_error_ratio_4xx:ratio5m", "legendFormat": "4xx — {{job}}", "refId": "B"}
+      ],
+      "title": "Taux d'erreur par service (5xx et 4xx)", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2}, "unit": "short"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 29}, "id": 13,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"]}},
+      "targets": [
+        {"expr": "job:http_error_ratio_5xx:ratio5m{job=\"api-gateway\"} / 0.001", "legendFormat": "Burn rate 5xx (1h) — API GW", "refId": "A"},
+        {"expr": "job:http_error_ratio_5xx:ratio5m{job=\"order-service\"} / 0.001", "legendFormat": "Burn rate 5xx (1h) — Order", "refId": "B"}
+      ],
+      "title": "Burn rate error budget (>1 = consommation plus rapide que le budget)", "type": "timeseries"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 38,
+  "tags": ["ecommerce", "slo", "sla"],
+  "templating": {
+    "list": [
+      {"current": {}, "hide": 0, "name": "datasource", "query": "prometheus", "refresh": 1, "type": "datasource", "label": "Datasource"}
+    ]
+  },
+  "time": {"from": "now-24h", "to": "now"},
+  "timezone": "browser",
+  "title": "60 — SLO / SLA",
+  "uid": "ecomm-slo",
+  "version": 1
+}
