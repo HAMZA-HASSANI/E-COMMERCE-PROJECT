@@ -19,11 +19,14 @@ spec:
       - name: notification-service
         image: ecommerce-notification-service:latest
         imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3004
+          name: metrics
         env:
         - name: RABBITMQ_URL
           valueFrom:
-            configMapKeyRef:
-              name: ecommerce-config
+            secretKeyRef:
+              name: ecommerce-secret
               key: RABBITMQ_URL
         - name: SMTP_HOST
           value: mailhog
@@ -37,6 +40,24 @@ spec:
             memory: "256Mi"
             cpu: "200m"
         restartPolicy: Always
+
+---
+# Notification Service (metrics scraping)
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: ecommerce
+  labels:
+    app: notification-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3004
+    targetPort: 3004
+    name: metrics
+  selector:
+    app: notification-service
 
 ---
 # MailHog Deployment (for testing emails)

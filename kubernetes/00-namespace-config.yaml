@@ -19,7 +19,7 @@ data:
   PRODUCT_SERVICE_URL: http://product-service:3001
   USER_SERVICE_URL: http://user-service:3002
   ORDER_SERVICE_URL: http://order-service:3003
-  RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+  REDIS_URL: redis://redis:6379
 
 ---
 # Secret for sensitive data
@@ -32,6 +32,7 @@ type: Opaque
 stringData:
   DB_USER: postgres
   DB_PASSWORD: postgres
-  JWT_SECRET: your-super-secret-key
+  JWT_SECRET: 9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a
   RABBITMQ_USER: guest
   RABBITMQ_PASSWORD: guest
+  RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672

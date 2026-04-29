@@ -259,8 +259,8 @@ spec:
               key: DB_NAME
         - name: RABBITMQ_URL
           valueFrom:
-            configMapKeyRef:
-              name: ecommerce-config
+            secretKeyRef:
+              name: ecommerce-secret
               key: RABBITMQ_URL
         resources:
           requests:

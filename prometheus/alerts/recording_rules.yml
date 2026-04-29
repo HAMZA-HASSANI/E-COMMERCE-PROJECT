@@ -1,0 +1,59 @@
+groups:
+  - name: http_recording_rules
+    interval: 30s
+    rules:
+      # Normalize per-service prefixed metrics into common names exposed via the job label.
+      # Matches api_gateway_*, product_service_*, user_service_*, order_service_* (all use a prefix).
+      - record: job:http_requests:rate5m
+        expr: |
+          sum by (job, status_code) (
+            rate({__name__=~".+_http_requests_total"}[5m])
+          )
+
+      - record: job:http_requests_total:rate5m
+        expr: |
+          sum by (job) (
+            rate({__name__=~".+_http_requests_total"}[5m])
+          )
+
+      - record: job:http_5xx:rate5m
+        expr: |
+          sum by (job) (
+            rate({__name__=~".+_http_requests_total", status_code=~"5.."}[5m])
+          )
+
+      - record: job:http_4xx:rate5m
+        expr: |
+          sum by (job) (
+            rate({__name__=~".+_http_requests_total", status_code=~"4.."}[5m])
+          )
+
+      - record: job:http_error_ratio_5xx:ratio5m
+        expr: |
+          job:http_5xx:rate5m
+          /
+          clamp_min(job:http_requests_total:rate5m, 0.001)
+
+      - record: job:http_error_ratio_4xx:ratio5m
+        expr: |
+          job:http_4xx:rate5m
+          /
+          clamp_min(job:http_requests_total:rate5m, 0.001)
+
+      - record: job:http_request_duration_seconds:p95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (job, le) (rate({__name__=~".+_http_request_duration_seconds_bucket"}[5m]))
+          )
+
+      - record: job:http_request_duration_seconds:p99
+        expr: |
+          histogram_quantile(0.99,
+            sum by (job, le) (rate({__name__=~".+_http_request_duration_seconds_bucket"}[5m]))
+          )
+
+      - record: job:http_request_duration_seconds:p50
+        expr: |
+          histogram_quantile(0.50,
+            sum by (job, le) (rate({__name__=~".+_http_request_duration_seconds_bucket"}[5m]))
+          )

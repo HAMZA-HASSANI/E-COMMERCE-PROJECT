@@ -39,7 +39,7 @@ services:
     networks:
       - ecommerce-network
 
-  # RabbitMQ Message Broker
+  # RabbitMQ Message Broker (with prometheus plugin enabled)
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: ecommerce-rabbitmq
@@ -48,9 +48,11 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "15692:15692"
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
@@ -70,6 +72,7 @@ services:
       PRODUCT_SERVICE_URL: http://product-service:3001
       USER_SERVICE_URL: http://user-service:3002
       ORDER_SERVICE_URL: http://order-service:3003
+      REDIS_URL: redis://redis:6379
     ports:
       - "3000:3000"
     depends_on:
@@ -93,8 +96,11 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-ecommerce}
+      REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - ecommerce-network
@@ -114,8 +120,11 @@ services:
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-ecommerce}
       JWT_SECRET: ${JWT_SECRET:-your-secret-key}
+      REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - ecommerce-network
@@ -154,8 +163,15 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672
       SMTP_HOST: ${SMTP_HOST:-mailhog}
       SMTP_PORT: ${SMTP_PORT:-1025}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-ecommerce}
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     networks:
       - ecommerce-network
@@ -171,10 +187,180 @@ services:
     networks:
       - ecommerce-network
 
+  # Prometheus for Metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ecommerce-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts:/etc/prometheus/alerts:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - alertmanager
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # Alertmanager for alert routing & notifications
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: ecommerce-alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    ports:
+      - "9093:9093"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # Node Exporter — host-level metrics (CPU, memory, disk)
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: ecommerce-node-exporter
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9100:9100"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # PostgreSQL Exporter
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: ecommerce-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-ecommerce}?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: ecommerce-redis-exporter
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+    ports:
+      - "9121:9121"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # Grafana for Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ecommerce-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=mailhog:1025
+      - GF_SMTP_FROM_ADDRESS=grafana@ecommerce-platform.local
+      - GF_SMTP_SKIP_VERIFY=true
+    ports:
+      - "3005:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+      - alertmanager
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # ─── Load-generating REST clients (opt-in via `--profile load`) ──────────
+  browse-client:
+    build:
+      context: ./load-clients/browse-client
+      dockerfile: Dockerfile
+    container_name: ecommerce-browse-client
+    environment:
+      API_BASE_URL: http://api-gateway:3000
+      CLIENT_NAME: browse-client
+      MIN_INTERVAL_MS: 500
+      MAX_INTERVAL_MS: 2000
+    depends_on:
+      - api-gateway
+    networks:
+      - ecommerce-network
+    profiles: ["load"]
+    restart: unless-stopped
+
+  shopper-client:
+    build:
+      context: ./load-clients/shopper-client
+      dockerfile: Dockerfile
+    container_name: ecommerce-shopper-client
+    environment:
+      API_BASE_URL: http://api-gateway:3000
+      CLIENT_NAME: shopper-client
+      MIN_CYCLE_MS: 4000
+      MAX_CYCLE_MS: 10000
+      SHOPPER_PASSWORD: Password123!
+    depends_on:
+      - api-gateway
+    networks:
+      - ecommerce-network
+    profiles: ["load"]
+    restart: unless-stopped
+
+  stress-client:
+    build:
+      context: ./load-clients/stress-client
+      dockerfile: Dockerfile
+    container_name: ecommerce-stress-client
+    environment:
+      API_BASE_URL: http://api-gateway:3000
+      CLIENT_NAME: stress-client
+      CONCURRENCY: 5
+      REQUESTS_PER_BURST: 20
+      BURST_INTERVAL_MS: 1000
+      ERROR_RATIO: 0.15
+    depends_on:
+      - api-gateway
+    networks:
+      - ecommerce-network
+    profiles: ["load"]
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
   rabbitmq_data:
+  prometheus_data:
+  alertmanager_data:
+  grafana_data:
 
 networks:
   ecommerce-network:

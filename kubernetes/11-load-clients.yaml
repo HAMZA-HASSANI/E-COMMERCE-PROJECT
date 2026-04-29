@@ -1,0 +1,125 @@
+---
+# Load-generating REST clients (browse / shopper / stress).
+# Deploy ONLY when you want to generate traffic against the platform:
+#   kubectl apply -f kubernetes/11-load-clients.yaml
+# To stop:
+#   kubectl delete -f kubernetes/11-load-clients.yaml
+#
+# Images must be built into Minikube's docker daemon first
+# (see scripts/start-platform.ps1 -WithLoad).
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: browse-client
+  namespace: ecommerce
+  labels:
+    app: browse-client
+    role: load-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: browse-client
+  template:
+    metadata:
+      labels:
+        app: browse-client
+        role: load-generator
+    spec:
+      containers:
+      - name: browse-client
+        image: ecommerce-browse-client:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: API_BASE_URL
+          value: "http://api-gateway:3000"
+        - name: CLIENT_NAME
+          value: "browse-client"
+        - name: MIN_INTERVAL_MS
+          value: "500"
+        - name: MAX_INTERVAL_MS
+          value: "2000"
+        resources:
+          requests: { memory: "32Mi", cpu: "25m" }
+          limits:   { memory: "128Mi", cpu: "150m" }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopper-client
+  namespace: ecommerce
+  labels:
+    app: shopper-client
+    role: load-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shopper-client
+  template:
+    metadata:
+      labels:
+        app: shopper-client
+        role: load-generator
+    spec:
+      containers:
+      - name: shopper-client
+        image: ecommerce-shopper-client:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: API_BASE_URL
+          value: "http://api-gateway:3000"
+        - name: CLIENT_NAME
+          value: "shopper-client"
+        - name: MIN_CYCLE_MS
+          value: "4000"
+        - name: MAX_CYCLE_MS
+          value: "10000"
+        - name: SHOPPER_PASSWORD
+          value: "Password123!"
+        resources:
+          requests: { memory: "32Mi", cpu: "25m" }
+          limits:   { memory: "128Mi", cpu: "150m" }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stress-client
+  namespace: ecommerce
+  labels:
+    app: stress-client
+    role: load-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stress-client
+  template:
+    metadata:
+      labels:
+        app: stress-client
+        role: load-generator
+    spec:
+      containers:
+      - name: stress-client
+        image: ecommerce-stress-client:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: API_BASE_URL
+          value: "http://api-gateway:3000"
+        - name: CLIENT_NAME
+          value: "stress-client"
+        - name: CONCURRENCY
+          value: "5"
+        - name: REQUESTS_PER_BURST
+          value: "20"
+        - name: BURST_INTERVAL_MS
+          value: "1000"
+        - name: ERROR_RATIO
+          value: "0.15"
+        resources:
+          requests: { memory: "32Mi", cpu: "25m" }
+          limits:   { memory: "128Mi", cpu: "200m" }

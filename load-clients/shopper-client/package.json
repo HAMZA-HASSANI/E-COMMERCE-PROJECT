@@ -1,0 +1,12 @@
+{
+  "name": "shopper-client",
+  "version": "1.0.0",
+  "description": "Authenticated shopper REST client (login + browse + order)",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

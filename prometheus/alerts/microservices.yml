@@ -1,0 +1,165 @@
+groups:
+  - name: microservices_availability
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"api-gateway|product-service|user-service|order-service|notification-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} ({{ $labels.instance }}) has been unreachable for more than 1 minute."
+
+      - alert: ServiceFlapping
+        expr: changes(up{job=~"api-gateway|product-service|user-service|order-service|notification-service"}[10m]) > 4
+        for: 5m
+        labels:
+          severity: warning
+          category: availability
+        annotations:
+          summary: "Service {{ $labels.job }} is flapping"
+          description: "{{ $labels.job }} has restarted more than 4 times in the last 10 minutes."
+
+  - name: microservices_latency
+    interval: 30s
+    rules:
+      - alert: HighRequestLatencyP95
+        expr: job:http_request_duration_seconds:p95 > 1
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High p95 latency on {{ $labels.job }}"
+          description: "p95 request latency is {{ $value | humanizeDuration }} (threshold 1s) for the last 5 minutes."
+
+      - alert: VeryHighRequestLatencyP99
+        expr: job:http_request_duration_seconds:p99 > 3
+        for: 5m
+        labels:
+          severity: critical
+          category: performance
+        annotations:
+          summary: "Very high p99 latency on {{ $labels.job }}"
+          description: "p99 request latency is {{ $value | humanizeDuration }} (threshold 3s)."
+
+  - name: microservices_errors
+    interval: 30s
+    rules:
+      - alert: HighHttp5xxErrorRate
+        expr: job:http_error_ratio_5xx:ratio5m > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          category: errors
+        annotations:
+          summary: "High 5xx error rate on {{ $labels.job }}"
+          description: "{{ $labels.job }} returns {{ $value | humanizePercentage }} of 5xx responses (threshold 5%)."
+
+      - alert: ElevatedHttp4xxErrorRate
+        expr: job:http_error_ratio_4xx:ratio5m > 0.20
+        for: 10m
+        labels:
+          severity: warning
+          category: errors
+        annotations:
+          summary: "Elevated 4xx error rate on {{ $labels.job }}"
+          description: "{{ $labels.job }} returns {{ $value | humanizePercentage }} of 4xx responses (threshold 20%)."
+
+  - name: api_gateway_security
+    interval: 30s
+    rules:
+      - alert: AuthFailureSpike
+        expr: rate(api_gateway_auth_failures_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Spike in authentication failures"
+          description: "API Gateway sees {{ $value | printf \"%.2f\" }} auth failures/sec — possible brute-force or misconfiguration."
+
+      - alert: RateLimitRejectionSpike
+        expr: rate(api_gateway_rate_limit_rejections_total[5m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Sustained rate-limit rejections"
+          description: "{{ $value | printf \"%.2f\" }} requests/sec rejected by rate limiter — investigate traffic source."
+
+  - name: business_metrics
+    interval: 1m
+    rules:
+      - alert: NoOrdersCreated
+        expr: |
+          sum(increase(order_service_orders_created_total[30m])) == 0
+          and on() (hour() >= 8 and hour() <= 22)
+        for: 30m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "No orders created in the last 30 minutes"
+          description: "Order pipeline may be stalled — no order_service_orders_created_total increment during business hours."
+
+      - alert: HighEmailFailureRate
+        expr: |
+          (
+            sum(rate(notification_service_emails_failed_total[10m]))
+            /
+            clamp_min(sum(rate(notification_service_emails_sent_total[10m])) + sum(rate(notification_service_emails_failed_total[10m])), 1)
+          ) > 0.10
+        for: 10m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "High email failure rate"
+          description: "{{ $value | humanizePercentage }} of outbound emails are failing (threshold 10%)."
+
+      - alert: LowProductCacheHitRatio
+        expr: |
+          (
+            sum(rate(product_service_cache_hits_total[10m]))
+            /
+            clamp_min(sum(rate(product_service_cache_hits_total[10m])) + sum(rate(product_service_cache_misses_total[10m])), 1)
+          ) < 0.50
+        for: 15m
+        labels:
+          severity: info
+          category: performance
+        annotations:
+          summary: "Product cache hit ratio below 50%"
+          description: "Cache hit ratio is {{ $value | humanizePercentage }} — Redis may be cold or undersized."
+
+  - name: nodejs_runtime
+    interval: 30s
+    rules:
+      - alert: NodeJsHighHeapUsage
+        expr: |
+          (
+            {__name__=~".+_nodejs_heap_size_used_bytes"}
+            /
+            on(instance, job) {__name__=~".+_nodejs_heap_size_total_bytes"}
+          ) > 0.90
+        for: 10m
+        labels:
+          severity: warning
+          category: runtime
+        annotations:
+          summary: "Node.js heap usage > 90% on {{ $labels.job }}"
+          description: "Heap usage at {{ $value | humanizePercentage }} for 10 minutes — possible memory leak."
+
+      - alert: NodeJsEventLoopLag
+        expr: '{__name__=~".+_nodejs_eventloop_lag_seconds"} > 0.2'
+        for: 5m
+        labels:
+          severity: warning
+          category: runtime
+        annotations:
+          summary: "Event loop lag on {{ $labels.job }}"
+          description: "Event loop lag is {{ $value | humanizeDuration }} (threshold 200ms)."

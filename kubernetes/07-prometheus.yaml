@@ -1,0 +1,443 @@
+---
+# Prometheus main configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: ecommerce
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: 'ecommerce-platform'
+        environment: 'minikube'
+
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+                - alertmanager:9093
+
+    rule_files:
+      - '/etc/prometheus/alerts/*.yml'
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'alertmanager'
+        static_configs:
+          - targets: ['alertmanager:9093']
+
+      # ---- Microservices ----
+      - job_name: 'api-gateway'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['api-gateway:3000']
+            labels: { service: 'api-gateway', tier: 'edge' }
+
+      - job_name: 'product-service'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['product-service:3001']
+            labels: { service: 'product-service', tier: 'backend' }
+
+      - job_name: 'user-service'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['user-service:3002']
+            labels: { service: 'user-service', tier: 'backend' }
+
+      - job_name: 'order-service'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['order-service:3003']
+            labels: { service: 'order-service', tier: 'backend' }
+
+      - job_name: 'notification-service'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['notification-service:3004']
+            labels: { service: 'notification-service', tier: 'backend' }
+
+      # ---- Infrastructure exporters ----
+      - job_name: 'node-exporter'
+        static_configs:
+          - targets: ['node-exporter:9100']
+            labels: { component: 'host' }
+
+      - job_name: 'postgres-exporter'
+        static_configs:
+          - targets: ['postgres-exporter:9187']
+            labels: { component: 'database' }
+
+      - job_name: 'redis-exporter'
+        static_configs:
+          - targets: ['redis-exporter:9121']
+            labels: { component: 'cache' }
+
+      - job_name: 'rabbitmq'
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['rabbitmq:15692']
+            labels: { component: 'broker' }
+
+---
+# Recording rules + alerting rules
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-alerts
+  namespace: ecommerce
+data:
+  recording_rules.yml: |
+    groups:
+      - name: http_recording_rules
+        interval: 30s
+        rules:
+          - record: job:http_requests_total:rate5m
+            expr: sum by (job) (rate({__name__=~".+_http_requests_total"}[5m]))
+          - record: job:http_5xx:rate5m
+            expr: sum by (job) (rate({__name__=~".+_http_requests_total", status_code=~"5.."}[5m]))
+          - record: job:http_4xx:rate5m
+            expr: sum by (job) (rate({__name__=~".+_http_requests_total", status_code=~"4.."}[5m]))
+          - record: job:http_error_ratio_5xx:ratio5m
+            expr: job:http_5xx:rate5m / clamp_min(job:http_requests_total:rate5m, 0.001)
+          - record: job:http_error_ratio_4xx:ratio5m
+            expr: job:http_4xx:rate5m / clamp_min(job:http_requests_total:rate5m, 0.001)
+          - record: job:http_request_duration_seconds:p50
+            expr: histogram_quantile(0.50, sum by (job, le) (rate({__name__=~".+_http_request_duration_seconds_bucket"}[5m])))
+          - record: job:http_request_duration_seconds:p95
+            expr: histogram_quantile(0.95, sum by (job, le) (rate({__name__=~".+_http_request_duration_seconds_bucket"}[5m])))
+          - record: job:http_request_duration_seconds:p99
+            expr: histogram_quantile(0.99, sum by (job, le) (rate({__name__=~".+_http_request_duration_seconds_bucket"}[5m])))
+
+  microservices.yml: |
+    groups:
+      - name: microservices_availability
+        interval: 30s
+        rules:
+          - alert: ServiceDown
+            expr: up{job=~"api-gateway|product-service|user-service|order-service|notification-service"} == 0
+            for: 1m
+            labels: { severity: critical, category: availability }
+            annotations:
+              summary: "Service {{ $labels.job }} is down"
+              description: "{{ $labels.job }} ({{ $labels.instance }}) unreachable for > 1 min."
+
+          - alert: ServiceFlapping
+            expr: changes(up{job=~"api-gateway|product-service|user-service|order-service|notification-service"}[10m]) > 4
+            for: 5m
+            labels: { severity: warning, category: availability }
+            annotations:
+              summary: "Service {{ $labels.job }} is flapping"
+              description: "{{ $labels.job }} restarted > 4 times in 10 min."
+
+      - name: microservices_latency
+        interval: 30s
+        rules:
+          - alert: HighRequestLatencyP95
+            expr: job:http_request_duration_seconds:p95 > 1
+            for: 5m
+            labels: { severity: warning, category: performance }
+            annotations:
+              summary: "High p95 latency on {{ $labels.job }}"
+              description: "p95 = {{ $value | humanizeDuration }} (threshold 1s)."
+
+          - alert: VeryHighRequestLatencyP99
+            expr: job:http_request_duration_seconds:p99 > 3
+            for: 5m
+            labels: { severity: critical, category: performance }
+            annotations:
+              summary: "Very high p99 latency on {{ $labels.job }}"
+              description: "p99 = {{ $value | humanizeDuration }} (threshold 3s)."
+
+      - name: microservices_errors
+        interval: 30s
+        rules:
+          - alert: HighHttp5xxErrorRate
+            expr: job:http_error_ratio_5xx:ratio5m > 0.05
+            for: 5m
+            labels: { severity: critical, category: errors }
+            annotations:
+              summary: "High 5xx rate on {{ $labels.job }}"
+              description: "{{ $labels.job }} returning {{ $value | humanizePercentage }} 5xx (threshold 5%)."
+
+          - alert: ElevatedHttp4xxErrorRate
+            expr: job:http_error_ratio_4xx:ratio5m > 0.20
+            for: 10m
+            labels: { severity: warning, category: errors }
+            annotations:
+              summary: "Elevated 4xx rate on {{ $labels.job }}"
+              description: "{{ $labels.job }} returning {{ $value | humanizePercentage }} 4xx (threshold 20%)."
+
+      - name: api_gateway_security
+        interval: 30s
+        rules:
+          - alert: AuthFailureSpike
+            expr: rate(api_gateway_auth_failures_total[5m]) > 1
+            for: 5m
+            labels: { severity: warning, category: security }
+            annotations:
+              summary: "Spike in authentication failures"
+              description: "{{ $value | printf \"%.2f\" }} auth failures/sec on API Gateway."
+
+          - alert: RateLimitRejectionSpike
+            expr: rate(api_gateway_rate_limit_rejections_total[5m]) > 5
+            for: 5m
+            labels: { severity: warning, category: security }
+            annotations:
+              summary: "Sustained rate-limit rejections"
+              description: "{{ $value | printf \"%.2f\" }} req/sec rejected by rate limiter."
+
+      - name: business_metrics
+        interval: 1m
+        rules:
+          - alert: NoOrdersCreated
+            expr: |
+              sum(increase(order_service_orders_created_total[30m])) == 0
+              and on() (hour() >= 8 and hour() <= 22)
+            for: 30m
+            labels: { severity: warning, category: business }
+            annotations:
+              summary: "No orders in last 30 min"
+              description: "Order pipeline may be stalled."
+
+          - alert: HighEmailFailureRate
+            expr: |
+              (
+                sum(rate(notification_service_emails_failed_total[10m]))
+                /
+                clamp_min(sum(rate(notification_service_emails_sent_total[10m])) + sum(rate(notification_service_emails_failed_total[10m])), 1)
+              ) > 0.10
+            for: 10m
+            labels: { severity: warning, category: business }
+            annotations:
+              summary: "High email failure rate"
+              description: "{{ $value | humanizePercentage }} of emails failing (threshold 10%)."
+
+          - alert: LowProductCacheHitRatio
+            expr: |
+              (
+                sum(rate(product_service_cache_hits_total[10m]))
+                /
+                clamp_min(sum(rate(product_service_cache_hits_total[10m])) + sum(rate(product_service_cache_misses_total[10m])), 1)
+              ) < 0.50
+            for: 15m
+            labels: { severity: info, category: performance }
+            annotations:
+              summary: "Cache hit ratio below 50%"
+              description: "Hit ratio = {{ $value | humanizePercentage }}."
+
+      - name: nodejs_runtime
+        interval: 30s
+        rules:
+          - alert: NodeJsHighHeapUsage
+            expr: |
+              (
+                {__name__=~".+_nodejs_heap_size_used_bytes"}
+                /
+                on(instance, job) {__name__=~".+_nodejs_heap_size_total_bytes"}
+              ) > 0.90
+            for: 10m
+            labels: { severity: warning, category: runtime }
+            annotations:
+              summary: "Heap > 90% on {{ $labels.job }}"
+              description: "Heap = {{ $value | humanizePercentage }}."
+
+          - alert: NodeJsEventLoopLag
+            expr: '{__name__=~".+_nodejs_eventloop_lag_seconds"} > 0.2'
+            for: 5m
+            labels: { severity: warning, category: runtime }
+            annotations:
+              summary: "Event loop lag on {{ $labels.job }}"
+              description: "Lag = {{ $value | humanizeDuration }}."
+
+  infrastructure.yml: |
+    groups:
+      - name: host_resources
+        interval: 30s
+        rules:
+          - alert: HostHighCpuUsage
+            expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+            for: 10m
+            labels: { severity: warning, category: infrastructure }
+            annotations:
+              summary: "High CPU on {{ $labels.instance }}"
+              description: "CPU = {{ $value | printf \"%.1f\" }}%."
+
+          - alert: HostHighMemoryUsage
+            expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+            for: 10m
+            labels: { severity: warning, category: infrastructure }
+            annotations:
+              summary: "High memory on {{ $labels.instance }}"
+              description: "Memory = {{ $value | printf \"%.1f\" }}%."
+
+          - alert: HostLowDiskSpace
+            expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+            for: 10m
+            labels: { severity: warning, category: infrastructure }
+            annotations:
+              summary: "Low disk on {{ $labels.instance }}"
+              description: "{{ $value | printf \"%.1f\" }}% remaining."
+
+      - name: postgres
+        interval: 30s
+        rules:
+          - alert: PostgresDown
+            expr: pg_up == 0
+            for: 1m
+            labels: { severity: critical, category: database }
+            annotations:
+              summary: "PostgreSQL is down"
+              description: "Cannot reach DB for 1 min."
+
+          - alert: PostgresTooManyConnections
+            expr: |
+              sum by (instance) (pg_stat_activity_count)
+              /
+              on(instance) pg_settings_max_connections > 0.85
+            for: 5m
+            labels: { severity: warning, category: database }
+            annotations:
+              summary: "Postgres connections > 85%"
+              description: "{{ $value | humanizePercentage }} of max."
+
+      - name: redis
+        interval: 30s
+        rules:
+          - alert: RedisDown
+            expr: redis_up == 0
+            for: 1m
+            labels: { severity: critical, category: cache }
+            annotations:
+              summary: "Redis is down"
+              description: "Cannot reach Redis for 1 min."
+
+          - alert: RedisHighMemoryUsage
+            expr: (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 90
+            for: 5m
+            labels: { severity: warning, category: cache }
+            annotations:
+              summary: "Redis memory > 90%"
+              description: "Memory = {{ $value | printf \"%.1f\" }}%."
+
+      - name: rabbitmq
+        interval: 30s
+        rules:
+          - alert: RabbitMqDown
+            expr: rabbitmq_up == 0
+            for: 1m
+            labels: { severity: critical, category: broker }
+            annotations:
+              summary: "RabbitMQ is down"
+              description: "Unreachable for 1 min."
+
+          - alert: RabbitMqQueueBacklog
+            expr: rabbitmq_queue_messages_ready > 1000
+            for: 10m
+            labels: { severity: warning, category: broker }
+            annotations:
+              summary: "Backlog on queue {{ $labels.queue }}"
+              description: "{{ $value }} ready messages."
+
+---
+# Prometheus PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-pvc
+  namespace: ecommerce
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+# Prometheus Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      securityContext:
+        fsGroup: 65534
+        runAsUser: 65534
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus'
+          - '--storage.tsdb.retention.time=15d'
+          - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+          - '--web.console.templates=/usr/share/prometheus/consoles'
+          - '--web.enable-lifecycle'
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - name: prometheus-config-volume
+          mountPath: /etc/prometheus/prometheus.yml
+          subPath: prometheus.yml
+        - name: prometheus-alerts-volume
+          mountPath: /etc/prometheus/alerts
+        - name: prometheus-storage
+          mountPath: /prometheus
+        readinessProbe:
+          httpGet: { path: /-/ready, port: 9090 }
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet: { path: /-/healthy, port: 9090 }
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "768Mi"
+            cpu: "500m"
+      volumes:
+      - name: prometheus-config-volume
+        configMap:
+          name: prometheus-config
+      - name: prometheus-alerts-volume
+        configMap:
+          name: prometheus-alerts
+      - name: prometheus-storage
+        persistentVolumeClaim:
+          claimName: prometheus-pvc
+
+---
+# Prometheus Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: ecommerce
+  labels:
+    app: prometheus
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9090
+    targetPort: 9090
+  selector:
+    app: prometheus

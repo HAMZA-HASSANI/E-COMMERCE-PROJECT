@@ -1,0 +1,81 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'mailhog:1025'
+  smtp_from: 'alerts@ecommerce-platform.local'
+  smtp_require_tls: false
+
+# Inhibit rules: if a critical alert fires, silence equivalent warning alerts
+inhibit_rules:
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity = "warning"
+    equal: ['alertname', 'job', 'instance']
+
+# Routing tree
+route:
+  receiver: 'default-receiver'
+  group_by: ['alertname', 'job', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+  routes:
+    - matchers:
+        - severity = "critical"
+      receiver: 'critical-receiver'
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: true
+
+    - matchers:
+        - category = "security"
+      receiver: 'security-receiver'
+      repeat_interval: 30m
+      continue: true
+
+    - matchers:
+        - category = "business"
+      receiver: 'business-receiver'
+      repeat_interval: 2h
+
+    - matchers:
+        - category =~ "database|cache|broker|infrastructure"
+      receiver: 'ops-receiver'
+      repeat_interval: 2h
+
+receivers:
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'devteam@ecommerce-platform.local'
+        send_resolved: true
+        headers:
+          Subject: '[ALERT - {{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+
+  - name: 'critical-receiver'
+    email_configs:
+      - to: 'oncall@ecommerce-platform.local'
+        send_resolved: true
+        headers:
+          Subject: '[CRITICAL - {{ .Status | toUpper }}] {{ .GroupLabels.alertname }} on {{ .GroupLabels.job }}'
+
+  - name: 'security-receiver'
+    email_configs:
+      - to: 'security@ecommerce-platform.local'
+        send_resolved: true
+        headers:
+          Subject: '[SECURITY - {{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+
+  - name: 'business-receiver'
+    email_configs:
+      - to: 'product@ecommerce-platform.local'
+        send_resolved: true
+        headers:
+          Subject: '[BUSINESS - {{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+
+  - name: 'ops-receiver'
+    email_configs:
+      - to: 'ops@ecommerce-platform.local'
+        send_resolved: true
+        headers:
+          Subject: '[OPS - {{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'

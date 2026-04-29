@@ -511,6 +511,485 @@
         .kpi-label { font-size: 0.8em; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
         .kpi-target { font-size: 0.75em; color: var(--success); margin-top: 2px; }
 
+        /* ─── TESTS EXPLOITANT ─── */
+        .test-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .test-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(99,102,241,0.04);
+        }
+        .test-card-icon {
+            font-size: 1.6em;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+        .test-card-header h3 {
+            font-size: 1em;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .test-card-header .tc-sub {
+            font-size: 0.78em;
+            color: var(--text-muted);
+        }
+        .tc-badges {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .tc-port {
+            font-size: 0.72em;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.25);
+            color: var(--primary-light);
+            font-family: monospace;
+        }
+        .tc-env {
+            font-size: 0.7em;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .tc-env.local { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+        .tc-env.k8s   { background: rgba(50,108,229,0.15); color: #93c5fd; border: 1px solid rgba(50,108,229,0.25); }
+        .tc-env.both  { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+
+        .test-steps { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+        .test-step {
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .test-step-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px 8px;
+            font-size: 0.8em;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .step-num {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.75em;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .step-tool-badge {
+            margin-left: auto;
+            font-size: 0.7em;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .step-tool-badge.curl    { background: rgba(245,158,11,0.2); color: #fbbf24; }
+        .step-tool-badge.kubectl { background: rgba(50,108,229,0.2); color: #93c5fd; }
+        .step-tool-badge.psql    { background: rgba(50,103,145,0.25); color: #7dd3fc; }
+        .step-tool-badge.redis   { background: rgba(220,53,69,0.2);  color: #fca5a5; }
+        .step-tool-badge.browser { background: rgba(16,185,129,0.2); color: #34d399; }
+        .step-tool-badge.amqp    { background: rgba(255,102,0,0.2);  color: #fdba74; }
+        .step-tool-badge.helm    { background: rgba(99,102,241,0.2); color: var(--primary-light); }
+        .step-tool-badge.sh      { background: rgba(139,92,246,0.2); color: #a78bfa; }
+
+        .test-cmd-wrapper {
+            position: relative;
+        }
+        .test-cmd-wrapper:hover .copy-btn,
+        .test-cmd-wrapper .copy-btn.copied {
+            opacity: 1;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            font-size: 0.72em;
+            font-weight: 600;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: var(--text-muted);
+            background: rgba(15,15,26,0.85);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.15s, color 0.15s, border-color 0.15s, background 0.15s;
+            backdrop-filter: blur(4px);
+            white-space: nowrap;
+            z-index: 10;
+            user-select: none;
+        }
+        .copy-btn:hover {
+            color: var(--primary-light);
+            border-color: rgba(99,102,241,0.4);
+            background: rgba(99,102,241,0.1);
+        }
+        .copy-btn.copied {
+            color: var(--success);
+            border-color: rgba(16,185,129,0.4);
+            background: rgba(16,185,129,0.08);
+        }
+        .copy-btn svg { flex-shrink: 0; }
+        .test-cmd {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82em;
+            padding: 12px 44px 12px 14px;
+            color: #a5f3fc;
+            white-space: pre;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+        .test-cmd .cmd-comment { color: #475569; }
+        .test-cmd .cmd-kw      { color: #c084fc; }
+        .test-cmd .cmd-str     { color: #86efac; }
+        .test-cmd .cmd-flag    { color: #fde68a; }
+
+        .expected-output {
+            border-top: 1px solid var(--border);
+            padding: 10px 14px;
+            font-size: 0.77em;
+        }
+        .expected-output .eo-label {
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--success);
+            margin-bottom: 5px;
+        }
+        .expected-output code {
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #86efac;
+            background: rgba(16,185,129,0.08);
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+        .expected-output p { color: var(--text-muted); line-height: 1.5; }
+
+        .test-tip {
+            display: flex;
+            gap: 10px;
+            padding: 10px 14px;
+            background: rgba(239,68,68,0.05);
+            border-top: 1px solid rgba(239,68,68,0.15);
+            font-size: 0.78em;
+            color: var(--text-muted);
+        }
+        .test-tip .tt-icon { color: #f87171; flex-shrink: 0; }
+        .test-tip strong { color: #f87171; }
+
+        .prereq-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.78em;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+        .prereq-bar .pb-label { font-weight: 700; color: var(--warning); white-space: nowrap; }
+        .prereq-tag {
+            background: rgba(245,158,11,0.1);
+            border: 1px solid rgba(245,158,11,0.2);
+            color: #fbbf24;
+            padding: 2px 9px;
+            border-radius: 100px;
+            font-size: 0.9em;
+        }
+
+        .tests-legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.8em;
+            color: var(--text-muted);
+        }
+        .tests-legend-item { display: flex; align-items: center; gap: 7px; }
+
+        /* ─── FORMATION ─── */
+        .learning-path-timeline {
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 48px;
+            position: relative;
+        }
+        .learning-path-timeline::before {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: 60px;
+            right: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 50%, var(--success) 100%);
+            z-index: 0;
+        }
+        .lp-step {
+            flex: 1;
+            min-width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .lp-step-dot {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            font-weight: 800;
+            border: 3px solid var(--bg);
+            flex-shrink: 0;
+        }
+        .lp-step-dot.phase1 { background: linear-gradient(135deg, #6366f1, #818cf8); }
+        .lp-step-dot.phase2 { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
+        .lp-step-dot.phase3 { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .lp-step-dot.phase4 { background: linear-gradient(135deg, #10b981, #34d399); }
+        .lp-step-dot.phase5 { background: linear-gradient(135deg, #ef4444, #f87171); }
+        .lp-step-label {
+            font-size: 0.75em;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .lp-step-duration {
+            font-size: 0.7em;
+            color: var(--primary-light);
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 100px;
+            padding: 2px 10px;
+        }
+
+        .tech-track {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .tech-track:hover {
+            border-color: rgba(99,102,241,0.5);
+            transform: translateY(-2px);
+        }
+        .tech-track-header {
+            padding: 20px 24px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .tech-track-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+        .tech-track-icon.node  { background: rgba(104,160,99,0.15); }
+        .tech-track-icon.db    { background: rgba(50,103,145,0.2); }
+        .tech-track-icon.cache { background: rgba(220,53,69,0.15); }
+        .tech-track-icon.mq    { background: rgba(255,102,0,0.15); }
+        .tech-track-icon.search{ background: rgba(0,191,255,0.15); }
+        .tech-track-icon.docker{ background: rgba(30,136,229,0.15); }
+        .tech-track-icon.k8s   { background: rgba(50,108,229,0.15); }
+        .tech-track-icon.obs   { background: rgba(229,96,10,0.15); }
+        .tech-track-icon.sec   { background: rgba(99,102,241,0.15); }
+        .tech-track-icon.archi { background: rgba(16,185,129,0.15); }
+
+        .tech-track-meta { flex: 1; min-width: 0; }
+        .tech-track-meta h3 {
+            font-size: 1em;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+        .tech-track-meta .version {
+            font-size: 0.72em;
+            color: var(--text-muted);
+        }
+        .diff-badge {
+            font-size: 0.68em;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+        .diff-badge.beginner     { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .diff-badge.intermediate { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .diff-badge.advanced     { background: rgba(239,68,68,0.15);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+        .tech-track-body { padding: 18px 24px; }
+        .tech-track-body p {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+        .concepts-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .concepts-list li {
+            font-size: 0.72em;
+            background: rgba(99,102,241,0.08);
+            border: 1px solid rgba(99,102,241,0.15);
+            color: var(--primary-light);
+            padding: 3px 10px;
+            border-radius: 100px;
+        }
+        .resource-links {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8em;
+            color: var(--text);
+            text-decoration: none;
+            background: var(--bg-card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .resource-link:hover { border-color: var(--primary); color: var(--primary-light); }
+        .resource-link .rl-type {
+            font-size: 0.68em;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .rl-type.docs  { background: rgba(99,102,241,0.2); color: var(--primary-light); }
+        .rl-type.video { background: rgba(239,68,68,0.2);  color: #f87171; }
+        .rl-type.cours { background: rgba(245,158,11,0.2); color: #fbbf24; }
+        .rl-type.book  { background: rgba(16,185,129,0.2); color: #34d399; }
+        .rl-type.cert  { background: rgba(6,182,212,0.2);  color: var(--accent); }
+        .rl-type.exo   { background: rgba(139,92,246,0.2); color: #a78bfa; }
+        .rl-name { flex: 1; }
+        .rl-duration {
+            font-size: 0.75em;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .tech-track-footer {
+            padding: 12px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78em;
+            color: var(--text-muted);
+        }
+        .duration-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cert-pill {
+            background: rgba(6,182,212,0.1);
+            border: 1px solid rgba(6,182,212,0.25);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .formation-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+        .formation-summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .formation-summary-card .fsv {
+            font-size: 1.8em;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .formation-summary-card .fsl {
+            font-size: 0.72em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 4px;
+        }
+
         /* ─── FOOTER ─── */
         .footer {
             text-align: center;
@@ -601,10 +1080,157 @@
     <button class="tab-button" onclick="showTab('operations', event)">
         <span class="tab-icon">⚙</span> Exploitation
     </button>
+    <button class="tab-button" onclick="showTab('api', event)">
+        <span class="tab-icon">🔌</span> API
+    </button>
+    <button class="tab-button" onclick="showTab('data-model', event)">
+        <span class="tab-icon">🗄️</span> Données
+    </button>
+    <button class="tab-button" onclick="showTab('formation', event)">
+        <span class="tab-icon">🎓</span> Formation
+    </button>
+    <button class="tab-button" onclick="showTab('tests-exploitant', event)">
+        <span class="tab-icon">🧪</span> Tests Exploitant
+    </button>
 </div>
 
 <!-- ══════════════════════════════════════════════════════ CONTENT -->
 <div class="content">
+
+<!-- ──────────────────────────────────── TAB: API -->
+<div id="api" class="tab-pane">
+    <div class="section-header">
+        <h2>Catalogue des APIs</h2>
+        <p>Documentation des endpoints exposés par l'API Gateway.</p>
+    </div>
+
+    <div class="section-title">Endpoints Publics &amp; Authentifiés</div>
+    <div class="code-block" style="font-family: monospace; line-height: 1.8;">
+<span class="cmd">API Gateway Base URL: http://localhost:3000</span>
+
+├── <span class="method get" style="padding: 2px 6px;">GET</span>  /health
+│   └── Status health check
+│
+├── <span class="method get" style="padding: 2px 6px;">GET</span>  /api
+│   └── Liste des services disponibles
+│
+├── /api/products
+│   ├── <span class="method get" style="padding: 2px 6px;">GET</span>    /                   → Lister tous les produits
+│   ├── <span class="method get" style="padding: 2px 6px;">GET</span>    /:id                → Détail d'un produit
+│   ├── <span class="method post" style="padding: 2px 6px;">POST</span>   /                   → Créer un produit (Admin)
+│   └── <span class="method put" style="padding: 2px 6px;">PUT</span>    /:id                → Modifier un produit (Admin)
+│
+├── /api/users
+│   ├── <span class="method get" style="padding: 2px 6px;">GET</span>    /                   → Lister les utilisateurs (Admin)
+│   ├── <span class="method get" style="padding: 2px 6px;">GET</span>    /:id                → Détail utilisateur
+│   ├── <span class="method post" style="padding: 2px 6px;">POST</span>   /register           → Créer un compte
+│   └── <span class="method post" style="padding: 2px 6px;">POST</span>   /login              → Authentification (Retourne JWT)
+│
+└── /api/orders
+    ├── <span class="method get" style="padding: 2px 6px;">GET</span>    /                   → Lister les commandes
+    ├── <span class="method get" style="padding: 2px 6px;">GET</span>    /:id                → Détail d'une commande
+    ├── <span class="method post" style="padding: 2px 6px;">POST</span>   /                   → Créer une commande
+    └── <span class="method get" style="padding: 2px 6px;">GET</span>    /user/:userId       → Commandes d'un utilisateur
+    </div>
+
+    <div class="alert info" style="margin-top: 20px;">
+        <span class="alert-icon">🔒</span>
+        <div>
+            <strong>Authentification requise</strong>
+            <p>La plupart des routes nécessitent un token JWT valide passé dans le header <code>Authorization: Bearer &lt;token&gt;</code>.</p>
+        </div>
+    </div>
+
+    <div class="section-title">Scénarios Détaillés de Communication API</div>
+    
+    <div class="maint-card" style="margin-bottom: 20px; border-left: 4px solid var(--primary);">
+        <h3 style="color: var(--primary-light);">Scénario 1 : Créer une Commande (Flow Complet)</h3>
+        <div class="code-block" style="margin-top: 10px; padding: 15px;">
+1. Client Request (POST /api/orders) → Payload: { userId: 1, items: [...] }
+2. API Gateway → Proxy request vers Order Service (:3003)
+3. Order Service :
+   - Valide le payload et calcule le montant total (total_amount)
+   - Insère la commande dans PostgreSQL
+   - Publie l'événement "order.created" sur RabbitMQ (Topic Exchange: orders)
+4. RabbitMQ route le message vers la file du Notification Service
+5. Notification Service :
+   - Consomme le message asynchrone
+   - Requête la DB pour les infos utilisateur (email) et cache Redis pour produits
+   - Envoie l'email de confirmation via SMTP (MailHog)
+6. Réponse immédiate au client (201 Created) sans attendre l'envoi d'email.
+Temps total de la requête API : ~60ms.</div>
+    </div>
+
+    <div class="maint-card" style="margin-bottom: 20px; border-left: 4px solid var(--success);">
+        <h3 style="color: #10b981;">Scénario 2 : Lister le Catalogue Produits (Cache-Aside Pattern)</h3>
+        <div class="code-block" style="margin-top: 10px; padding: 15px;">
+1. Client Request (GET /api/products)
+2. API Gateway → Proxy request vers Product Service (:3001)
+3. Product Service :
+   - Vérifie le cache Redis (clé "products:all")
+   - Si HIT (trouvé) : retourne immédiatement les données (Temps : ~15ms)
+   - Si MISS (non trouvé) : 
+     * Requête la base PostgreSQL
+     * Sérialise et stocke dans Redis avec un TTL (ex: 3600s)
+     * Retourne la réponse (Temps : ~110ms)
+Hit rate espéré : ~80%. Permet de réduire la charge DB massivement.</div>
+    </div>
+</div>
+
+<!-- ──────────────────────────────────── TAB: DATA MODEL -->
+<div id="data-model" class="tab-pane">
+    <div class="section-header">
+        <h2>Modèle de Données</h2>
+        <p>Structure des tables PostgreSQL et relations entre les entités.</p>
+    </div>
+
+    <div class="grid grid-3">
+        <div class="card data">
+            <div class="card-title">👥 Table: users</div>
+            <ul style="list-style: none; padding: 0; margin-top: 10px; color: var(--text-muted); font-size: 0.9em; font-family: monospace;">
+                <li><strong style="color:var(--text)">id</strong> (PK, UUID)</li>
+                <li><strong style="color:var(--text)">email</strong> (VARCHAR, UNIQUE)</li>
+                <li><strong style="color:var(--text)">password_hash</strong> (VARCHAR)</li>
+                <li><strong style="color:var(--text)">name</strong> (VARCHAR)</li>
+                <li><strong style="color:var(--text)">created_at</strong> (TIMESTAMP)</li>
+                <li><strong style="color:var(--text)">updated_at</strong> (TIMESTAMP)</li>
+            </ul>
+        </div>
+        
+        <div class="card data">
+            <div class="card-title">📦 Table: products</div>
+            <ul style="list-style: none; padding: 0; margin-top: 10px; color: var(--text-muted); font-size: 0.9em; font-family: monospace;">
+                <li><strong style="color:var(--text)">id</strong> (PK, UUID)</li>
+                <li><strong style="color:var(--text)">name</strong> (VARCHAR)</li>
+                <li><strong style="color:var(--text)">description</strong> (TEXT)</li>
+                <li><strong style="color:var(--text)">price</strong> (DECIMAL)</li>
+                <li><strong style="color:var(--text)">stock</strong> (INTEGER)</li>
+                <li><strong style="color:var(--text)">created_at</strong> (TIMESTAMP)</li>
+                <li><strong style="color:var(--text)">updated_at</strong> (TIMESTAMP)</li>
+            </ul>
+        </div>
+
+        <div class="card data">
+            <div class="card-title">🛒 Table: orders</div>
+            <ul style="list-style: none; padding: 0; margin-top: 10px; color: var(--text-muted); font-size: 0.9em; font-family: monospace;">
+                <li><strong style="color:var(--text)">id</strong> (PK, UUID)</li>
+                <li><strong style="color:var(--text)">user_id</strong> (FK &rarr; users.id)</li>
+                <li><strong style="color:var(--text)">total_amount</strong> (DECIMAL)</li>
+                <li><strong style="color:var(--text)">status</strong> (VARCHAR) <span style="font-size: 0.8em;">[pending, completed, failed]</span></li>
+                <li><strong style="color:var(--text)">created_at</strong> (TIMESTAMP)</li>
+                <li><strong style="color:var(--text)">updated_at</strong> (TIMESTAMP)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="alert warning" style="margin-top: 20px;">
+        <span class="alert-icon">💡</span>
+        <div>
+            <strong>Architecture Microservices</strong>
+            <p>Bien que les données soient présentées ensemble ici, dans un contexte de microservices stricts, chaque service gèrerait idéalement sa propre base de données. Actuellement, la plateforme partage une instance PostgreSQL avec des schémas logiques séparés.</p>
+        </div>
+    </div>
+</div>
 
 <!-- ──────────────────────────────────── TAB: ONBOARDING -->
 <div id="onboarding" class="tab-pane">
@@ -669,6 +1295,36 @@
             <li><strong>Tests :</strong> Vérifiez toujours que les tests passent et que le linter ne renvoie pas d'erreur avant de commit.</li>
             <li><strong>Pull Request :</strong> Soumettez votre PR pour revue. La CI automatique validera le build des images Docker.</li>
         </ul>
+    </div>
+
+    <div class="section-title">Parcours d'Apprentissage (Learning Path)</div>
+    <div class="grid grid-2">
+        <div class="card" style="border-left: 3px solid var(--primary);">
+            <div class="card-title">Semaine 1-2 : Docker &amp; Développement Local</div>
+            <ul style="padding-left: 20px; color: var(--text-muted); font-size: 0.9em; margin-top: 10px;">
+                <li style="margin-bottom: 6px;">Comprendre les <strong>Multi-stage builds</strong> pour des images plus légères.</li>
+                <li style="margin-bottom: 6px;">Lancer la stack complète avec <code>docker-compose up</code> et analyser les logs.</li>
+                <li style="margin-bottom: 6px;">Appréhender la gestion des volumes et des variables d'environnement.</li>
+                <li>Maîtriser le networking Docker entre les microservices.</li>
+            </ul>
+        </div>
+        <div class="card" style="border-left: 3px solid var(--accent);">
+            <div class="card-title">Semaine 3-4 : Concepts Kubernetes</div>
+            <ul style="padding-left: 20px; color: var(--text-muted); font-size: 0.9em; margin-top: 10px;">
+                <li style="margin-bottom: 6px;">Déployer manuellement via Minikube (Pods, Deployments, Services).</li>
+                <li style="margin-bottom: 6px;">Gérer la configuration avec <strong>ConfigMaps &amp; Secrets</strong>.</li>
+                <li style="margin-bottom: 6px;">Implémenter les <strong>Liveness &amp; Readiness probes</strong>.</li>
+                <li>Gérer les quotas de ressources (CPU/Memory limits).</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="alert info" style="margin-top: 20px;">
+        <span class="alert-icon">🛠️</span>
+        <div>
+            <strong>Outils Scripts fournis</strong>
+            <p>Le dossier <code>/scripts</code> contient des aides précieuses : <code>build-docker-images.sh</code>, <code>deploy-kubernetes.sh</code>, <code>cleanup-kubernetes.sh</code>.</p>
+        </div>
     </div>
 </div>
 
@@ -1331,6 +1987,45 @@
             </ul>
         </div>
     </div>
+
+    <div class="section-title">Performance et Latences Estimées</div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr><th>Opération</th><th>Réseau</th><th>Cache (Redis)</th><th>Base de Données</th><th>Total Estimé</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>List Products (Cache Hit)</strong></td>
+                    <td>~5ms</td><td>~10ms</td><td>0ms</td><td><strong style="color:var(--success)">~15ms</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>List Products (Cache Miss)</strong></td>
+                    <td>~5ms</td><td>~5ms</td><td>~100ms</td><td><strong style="color:var(--warning)">~110ms</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Create Order (Synchrone)</strong></td>
+                    <td>~10ms</td><td>-</td><td>~50ms</td><td><strong style="color:var(--success)">~60ms</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>Order Notification (Asynchrone)</strong></td>
+                    <td>~5ms (RMQ)</td><td>-</td><td>~80ms</td><td><strong style="color:var(--text)">~85ms</strong> (Non-bloquant)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alert warning" style="margin-top: 20px;">
+        <span class="alert-icon">⚠️</span>
+        <div>
+            <strong>Goulots d'étranglement potentiels (Bottlenecks)</strong>
+            <ul style="margin-top: 10px;">
+                <li><strong>PostgreSQL :</strong> Risque de lenteur sur des requêtes complexes sans indexation adéquate.</li>
+                <li><strong>RabbitMQ :</strong> Saturation possible si le nombre de messages dépasse la capacité des consumers (implémenter l'auto-scaling des Notification Services).</li>
+                <li><strong>Redis :</strong> Risque d'éviction de clés si la mémoire atteint 100% (Surveiller la politique LRU).</li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 <!-- ──────────────────────────────────── TAB: OPERATIONS -->
@@ -1619,6 +2314,1521 @@ INFO memory
                 <li>Documentation : ARCHITECTURE.md, COMMUNICATION_MATRIX.md, GETTING_STARTED.md</li>
             </ul>
         </div>
+    </div>
+
+    <div class="section-title" style="margin-top: 40px;">Résilience : Tolérance aux Pannes (Failure Scenarios)</div>
+    <div class="grid grid-3">
+        <div class="card" style="border-top: 3px solid var(--danger);">
+            <div class="card-title">🔴 Scénario : PostgreSQL Down</div>
+            <p style="font-size: 0.85em;"><strong>Impact :</strong> Services métiers (Product, Order, User) incapables de lire/écrire. L'API Gateway reste up mais renvoie des erreurs 500/503.</p>
+            <p style="font-size: 0.85em; margin-top: 8px; color: var(--text-muted);"><strong>Recouvrement :</strong> Les services implémentent un retry avec backoff exponentiel. Dès restauration de la DB, les connexions au pool se rétablissent automatiquement.</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--warning);">
+            <div class="card-title">🟠 Scénario : RabbitMQ Down</div>
+            <p style="font-size: 0.85em;"><strong>Impact :</strong> Les appels API synchrones continuent de fonctionner. Les événements de commandes (Order Notifications) sont ralentis ou mis en file d'attente locale.</p>
+            <p style="font-size: 0.85em; margin-top: 8px; color: var(--text-muted);"><strong>Recouvrement :</strong> L'Order Service retente la connexion. À la reconnexion, les messages en attente sont publiés et traités par le Notification Service.</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--primary-light);">
+            <div class="card-title">🔵 Scénario : Redis Down</div>
+            <p style="font-size: 0.85em;"><strong>Impact :</strong> Les <em>Cache Misses</em> grimpent à 100%, reportant la charge sur PostgreSQL (performances dégradées 5-10x). Pas de perte de données persistantes.</p>
+            <p style="font-size: 0.85em; margin-top: 8px; color: var(--text-muted);"><strong>Recouvrement :</strong> À la relance de Redis, le cache se repeuple progressivement (Cache-Aside pattern) et les temps de réponse se normalisent.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ──────────────────────────────────── TAB: FORMATION -->
+<div id="formation" class="tab-pane">
+    <div class="section-header">
+        <h2>Parcours de Formation — Technologies de la Plateforme</h2>
+        <p>Référence complète avec ressources officielles, cours recommandés et certifications pour chaque technologie utilisée dans la stack E-Commerce.</p>
+    </div>
+
+    <!-- RÉSUMÉ CHIFFRÉ -->
+    <div class="formation-summary-grid">
+        <div class="formation-summary-card">
+            <div class="fsv">12</div>
+            <div class="fsl">Technologies</div>
+        </div>
+        <div class="formation-summary-card">
+            <div class="fsv">~6</div>
+            <div class="fsl">Mois estimés</div>
+        </div>
+        <div class="formation-summary-card">
+            <div class="fsv">5</div>
+            <div class="fsl">Certifications dispo</div>
+        </div>
+        <div class="formation-summary-card">
+            <div class="fsv">40+</div>
+            <div class="fsl">Ressources gratuites</div>
+        </div>
+        <div class="formation-summary-card">
+            <div class="fsv">5</div>
+            <div class="fsl">Phases progressives</div>
+        </div>
+    </div>
+
+    <!-- ROADMAP VISUELLE -->
+    <div class="section-title">Roadmap d'apprentissage recommandée</div>
+    <div class="learning-path-timeline">
+        <div class="lp-step">
+            <div class="lp-step-dot phase1">1</div>
+            <div class="lp-step-label">Fondations Backend</div>
+            <div class="lp-step-duration">~3 semaines</div>
+        </div>
+        <div class="lp-step">
+            <div class="lp-step-dot phase2">2</div>
+            <div class="lp-step-label">Données &amp; Cache</div>
+            <div class="lp-step-duration">~4 semaines</div>
+        </div>
+        <div class="lp-step">
+            <div class="lp-step-dot phase3">3</div>
+            <div class="lp-step-label">Messaging &amp; Search</div>
+            <div class="lp-step-duration">~3 semaines</div>
+        </div>
+        <div class="lp-step">
+            <div class="lp-step-dot phase4">4</div>
+            <div class="lp-step-label">DevOps &amp; Cloud</div>
+            <div class="lp-step-duration">~6 semaines</div>
+        </div>
+        <div class="lp-step">
+            <div class="lp-step-dot phase5">5</div>
+            <div class="lp-step-label">Observabilité &amp; Archi</div>
+            <div class="lp-step-duration">~4 semaines</div>
+        </div>
+    </div>
+
+    <!-- ── PHASE 1 : FONDATIONS BACKEND ── -->
+    <div class="section-title">Phase 1 — Fondations Backend</div>
+    <div class="grid grid-2">
+
+        <!-- Node.js -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon node">🟢</div>
+                <div class="tech-track-meta">
+                    <h3>Node.js 18 (LTS)</h3>
+                    <div class="version">Runtime JavaScript côté serveur — utilisé par tous les microservices</div>
+                </div>
+                <span class="diff-badge beginner">Débutant</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Socle de tous les services de la plateforme. Comprendre l'event loop, les modules ES/CommonJS, les streams et la gestion asynchrone est indispensable.</p>
+                <ul class="concepts-list">
+                    <li>Event Loop</li><li>Async/Await</li><li>Promises</li>
+                    <li>Streams &amp; Buffer</li><li>Modules ESM</li><li>npm &amp; package.json</li>
+                    <li>Worker Threads</li><li>process &amp; env vars</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://nodejs.org/docs/latest-v18.x/api/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Documentation officielle Node.js 18</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://nodejs.dev/en/learn" target="_blank">
+                        <span class="rl-type cours">Cours</span><span class="rl-name">Node.js — Guide d'apprentissage officiel</span><span class="rl-duration">~20h</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=fBNz5xF-Kx4" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Node.js Crash Course — Traversy Media (YouTube)</span><span class="rl-duration">1h30</span>
+                    </a>
+                    <a class="resource-link" href="https://www.freecodecamp.org/news/the-definitive-node-js-handbook-6912378afc6e/" target="_blank">
+                        <span class="rl-type book">Livre</span><span class="rl-name">The Definitive Node.js Handbook — freeCodeCamp</span><span class="rl-duration">Lecture</span>
+                    </a>
+                    <a class="resource-link" href="https://nodeschool.io/" target="_blank">
+                        <span class="rl-type exo">Exercices</span><span class="rl-name">NodeSchool — Exercices interactifs en terminal</span><span class="rl-duration">~10h</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>2 semaines</strong></div>
+            </div>
+        </div>
+
+        <!-- Express.js -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon node">⚡</div>
+                <div class="tech-track-meta">
+                    <h3>Express.js 4</h3>
+                    <div class="version">Framework Web minimaliste — API Gateway &amp; tous les microservices</div>
+                </div>
+                <span class="diff-badge beginner">Débutant</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Framework central de la plateforme. Maîtriser le pipeline de middlewares, le routage et la gestion d'erreurs est fondamental pour contribuer à n'importe quel service.</p>
+                <ul class="concepts-list">
+                    <li>Routing &amp; Router</li><li>Middleware pipeline</li><li>Error handlers</li>
+                    <li>req / res / next</li><li>CORS &amp; Helmet</li><li>Rate Limiting</li>
+                    <li>Body parsing</li><li>Static files</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://expressjs.com/en/guide/routing.html" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Express.js — Guide officiel (Routing, Middleware, Error)</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://expressjs.com/en/advanced/best-practice-performance.html" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Express.js — Best Practices (Performance &amp; Security)</span><span class="rl-duration">Lecture</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=L72fhGm1tfE" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Express.js Full Course — freeCodeCamp (YouTube)</span><span class="rl-duration">8h</span>
+                    </a>
+                    <a class="resource-link" href="https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs" target="_blank">
+                        <span class="rl-type cours">Cours</span><span class="rl-name">The Odin Project — Node.js &amp; Express Path (gratuit)</span><span class="rl-duration">~40h</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>1 semaine</strong></div>
+            </div>
+        </div>
+
+        <!-- JWT & Sécurité -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon sec">🔐</div>
+                <div class="tech-track-meta">
+                    <h3>JWT &amp; Sécurité API</h3>
+                    <div class="version">express-jwt · jsonwebtoken · bcrypt · Helmet.js</div>
+                </div>
+                <span class="diff-badge intermediate">Intermédiaire</span>
+            </div>
+            <div class="tech-track-body">
+                <p>L'API Gateway valide chaque JWT entrant. Le User Service hache les mots de passe avec bcrypt. Comprendre l'authentification stateless est critique en microservices.</p>
+                <ul class="concepts-list">
+                    <li>JWT structure (header/payload/sig)</li><li>RS256 vs HS256</li>
+                    <li>Access &amp; Refresh tokens</li><li>bcrypt &amp; salt rounds</li>
+                    <li>Helmet.js headers</li><li>OWASP API Security</li>
+                    <li>Rate limiting</li><li>CORS policy</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://jwt.io/introduction" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">jwt.io — Introduction officielle au standard JWT (RFC 7519)</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://owasp.org/www-project-api-security/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">OWASP API Security Top 10 — Référence obligatoire</span><span class="rl-duration">Lecture</span>
+                    </a>
+                    <a class="resource-link" href="https://www.npmjs.com/package/bcrypt" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">npm bcrypt — Documentation &amp; usage guide</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=mbsmsi7l3r4" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">JWT Authentication — Web Dev Simplified (YouTube)</span><span class="rl-duration">30min</span>
+                    </a>
+                    <a class="resource-link" href="https://helmetjs.github.io/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Helmet.js — Documentation officielle (HTTP headers sécurisés)</span><span class="rl-duration">Référence</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>1 semaine</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PHASE 2 : DONNÉES & CACHE ── -->
+    <div class="section-title">Phase 2 — Données &amp; Cache</div>
+    <div class="grid grid-2">
+
+        <!-- PostgreSQL -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon db">🐘</div>
+                <div class="tech-track-meta">
+                    <h3>PostgreSQL 15</h3>
+                    <div class="version">Base de données relationnelle principale — users, products, orders</div>
+                </div>
+                <span class="diff-badge intermediate">Intermédiaire</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Toutes les données transactionnelles de la plateforme sont stockées dans PostgreSQL. Maîtriser SQL, les index et les transactions ACID est indispensable pour tout développeur backend.</p>
+                <ul class="concepts-list">
+                    <li>SQL (CRUD, JOIN, GROUP BY)</li><li>Transactions ACID</li>
+                    <li>Index B-tree &amp; GIN</li><li>JSONB columns</li>
+                    <li>Migrations (pg-migrate)</li><li>Connection pooling (pg-pool)</li>
+                    <li>EXPLAIN ANALYZE</li><li>Partitioning</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://www.postgresql.org/docs/15/index.html" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">PostgreSQL 15 — Documentation officielle complète</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://www.postgresqltutorial.com/" target="_blank">
+                        <span class="rl-type cours">Cours</span><span class="rl-name">PostgreSQL Tutorial — Cours complet et exercices (gratuit)</span><span class="rl-duration">~30h</span>
+                    </a>
+                    <a class="resource-link" href="https://use-the-index-luke.com/" target="_blank">
+                        <span class="rl-type book">Livre</span><span class="rl-name">Use The Index, Luke! — Guide des indexes SQL (gratuit)</span><span class="rl-duration">Lecture</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=qw--VYLpxG4" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">PostgreSQL Full Course — freeCodeCamp (YouTube)</span><span class="rl-duration">4h</span>
+                    </a>
+                    <a class="resource-link" href="https://pgexercises.com/" target="_blank">
+                        <span class="rl-type exo">Exercices</span><span class="rl-name">PGExercises — 80+ exercices SQL progressifs en ligne</span><span class="rl-duration">~15h</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>3 semaines</strong></div>
+                <span class="cert-pill">EDB PostgreSQL Cert.</span>
+            </div>
+        </div>
+
+        <!-- Redis -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon cache">⚡</div>
+                <div class="tech-track-meta">
+                    <h3>Redis 7</h3>
+                    <div class="version">Cache distribué · Session store · Rate limiting tokens</div>
+                </div>
+                <span class="diff-badge intermediate">Intermédiaire</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Redis est utilisé pour le cache des produits (TTL 1h), les sessions utilisateur (TTL 24h) et les tokens de rate limiting. Comprendre les structures de données et les stratégies d'éviction est clé.</p>
+                <ul class="concepts-list">
+                    <li>String, Hash, List, Set, ZSet</li><li>TTL &amp; Expiration</li>
+                    <li>LRU Eviction policy</li><li>RDB + AOF persistence</li>
+                    <li>Pub/Sub</li><li>Pipelining</li>
+                    <li>Cluster mode</li><li>ioredis (Node.js client)</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://redis.io/docs/latest/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Redis — Documentation officielle (commandes &amp; concepts)</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://university.redis.com/" target="_blank">
+                        <span class="rl-type cours">Cours</span><span class="rl-name">Redis University — Cours gratuits certifiants (RU101, RU102)</span><span class="rl-duration">~20h</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=jgpVdJB2sKQ" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Redis Crash Course — Web Dev Simplified (YouTube)</span><span class="rl-duration">30min</span>
+                    </a>
+                    <a class="resource-link" href="https://try.redis.io/" target="_blank">
+                        <span class="rl-type exo">Exercices</span><span class="rl-name">Try Redis — Sandbox interactif en ligne (officiel)</span><span class="rl-duration">~3h</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>1 semaine</strong></div>
+                <span class="cert-pill">Redis Certified Developer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PHASE 3 : MESSAGING & SEARCH ── -->
+    <div class="section-title">Phase 3 — Messaging &amp; Recherche</div>
+    <div class="grid grid-2">
+
+        <!-- RabbitMQ -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon mq">🐰</div>
+                <div class="tech-track-meta">
+                    <h3>RabbitMQ 3</h3>
+                    <div class="version">Message broker AMQP — découplage Order Service / Notification Service</div>
+                </div>
+                <span class="diff-badge intermediate">Intermédiaire</span>
+            </div>
+            <div class="tech-track-body">
+                <p>RabbitMQ est le cœur de l'architecture event-driven. L'Order Service publie, le Notification Service consomme. Comprendre les exchanges, queues et DLQ est fondamental.</p>
+                <ul class="concepts-list">
+                    <li>AMQP protocol</li><li>Exchange types (direct/topic/fanout)</li>
+                    <li>Queue bindings &amp; routing keys</li><li>ack / nack / reject</li>
+                    <li>Dead Letter Queue (DLQ)</li><li>Message persistence</li>
+                    <li>Prefetch count</li><li>amqplib (Node.js)</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://www.rabbitmq.com/docs" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">RabbitMQ — Documentation officielle complète</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://www.rabbitmq.com/tutorials" target="_blank">
+                        <span class="rl-type exo">Exercices</span><span class="rl-name">RabbitMQ Tutorials — 6 tutoriels officiels avec code Node.js</span><span class="rl-duration">~8h</span>
+                    </a>
+                    <a class="resource-link" href="https://www.cloudamqp.com/blog/part1-rabbitmq-for-beginners-what-is-rabbitmq.html" target="_blank">
+                        <span class="rl-type book">Guide</span><span class="rl-name">CloudAMQP — RabbitMQ for Beginners (série de 4 articles)</span><span class="rl-duration">Lecture</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=deG25y_r6OY" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">RabbitMQ &amp; Node.js — Crash Course pratique (YouTube)</span><span class="rl-duration">45min</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>2 semaines</strong></div>
+            </div>
+        </div>
+
+        <!-- Elasticsearch -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon search">🔍</div>
+                <div class="tech-track-meta">
+                    <h3>Elasticsearch</h3>
+                    <div class="version">Moteur de recherche full-text — utilisé par le Product Service</div>
+                </div>
+                <span class="diff-badge intermediate">Intermédiaire</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Elasticsearch permet la recherche full-text sur le catalogue produits (filtres, facettes, scoring de pertinence). Il complète PostgreSQL pour les requêtes complexes de recherche.</p>
+                <ul class="concepts-list">
+                    <li>Index &amp; mapping</li><li>Query DSL</li><li>Full-text search</li>
+                    <li>Aggregations &amp; facettes</li><li>Analyzers &amp; tokenizers</li>
+                    <li>Sharding &amp; replication</li><li>@elastic/elasticsearch (Node.js)</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Elasticsearch — Documentation officielle (référence API)</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://www.elastic.co/training/free" target="_blank">
+                        <span class="rl-type cours">Cours</span><span class="rl-name">Elastic Training — Cours gratuits Elastic (fondamentaux)</span><span class="rl-duration">~15h</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=C3tlMqaNSaI" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Elasticsearch Tutorial — TechWorld with Nana (YouTube)</span><span class="rl-duration">1h15</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>1 semaine</strong></div>
+                <span class="cert-pill">Elastic Certified Engineer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PHASE 4 : DEVOPS & CLOUD ── -->
+    <div class="section-title">Phase 4 — DevOps &amp; Cloud-Native</div>
+    <div class="grid grid-2">
+
+        <!-- Docker -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon docker">🐳</div>
+                <div class="tech-track-meta">
+                    <h3>Docker &amp; Docker Compose</h3>
+                    <div class="version">Conteneurisation — multi-stage builds · stack locale complète</div>
+                </div>
+                <span class="diff-badge beginner">Débutant</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Chaque microservice dispose d'un Dockerfile multi-stage (build léger, image Alpine en prod). Docker Compose orchestre l'ensemble de la stack localement.</p>
+                <ul class="concepts-list">
+                    <li>Images &amp; layers</li><li>Multi-stage builds</li><li>Volumes &amp; bind mounts</li>
+                    <li>Networks Docker</li><li>Docker Compose v3</li>
+                    <li>Health checks</li><li>Environment variables</li><li>.dockerignore</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://docs.docker.com/get-started/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Docker — Get Started (guide officiel en 9 parties)</span><span class="rl-duration">~6h</span>
+                    </a>
+                    <a class="resource-link" href="https://docs.docker.com/compose/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Docker Compose — Documentation officielle</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=3c-iBn73dDE" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Docker Tutorial for Beginners — TechWorld with Nana (YouTube)</span><span class="rl-duration">3h15</span>
+                    </a>
+                    <a class="resource-link" href="https://labs.play-with-docker.com/" target="_blank">
+                        <span class="rl-type exo">Exercices</span><span class="rl-name">Play with Docker — Sandbox gratuit en ligne (officiel)</span><span class="rl-duration">~5h</span>
+                    </a>
+                    <a class="resource-link" href="https://docs.docker.com/develop/develop-images/multistage-build/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Multi-stage builds — Guide officiel (utilisé dans ce projet)</span><span class="rl-duration">Lecture</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>2 semaines</strong></div>
+                <span class="cert-pill">Docker Certified Associate</span>
+            </div>
+        </div>
+
+        <!-- Kubernetes -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon k8s">☸️</div>
+                <div class="tech-track-meta">
+                    <h3>Kubernetes (K8s)</h3>
+                    <div class="version">Orchestration cloud-native — Deployments · StatefulSets · Services · HPA</div>
+                </div>
+                <span class="diff-badge advanced">Avancé</span>
+            </div>
+            <div class="tech-track-body">
+                <p>La plateforme est déployée sur Kubernetes avec des Deployments (services stateless), des StatefulSets (PostgreSQL, Redis), des PVC pour la persistance et des HPA pour l'auto-scaling.</p>
+                <ul class="concepts-list">
+                    <li>Pods &amp; ReplicaSets</li><li>Deployments</li><li>StatefulSets</li>
+                    <li>Services (ClusterIP/NodePort/LB)</li><li>ConfigMaps &amp; Secrets</li>
+                    <li>PersistentVolumeClaim</li><li>Liveness &amp; Readiness Probes</li>
+                    <li>Namespaces</li><li>HPA &amp; auto-scaling</li><li>kubectl CLI</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://kubernetes.io/docs/home/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Kubernetes — Documentation officielle complète</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://kubernetes.io/docs/tutorials/kubernetes-basics/" target="_blank">
+                        <span class="rl-type exo">Exercices</span><span class="rl-name">Kubernetes Basics — Tutoriel interactif officiel (6 modules)</span><span class="rl-duration">~3h</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=X48VuDVv0do" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Kubernetes Course — TechWorld with Nana (YouTube)</span><span class="rl-duration">4h</span>
+                    </a>
+                    <a class="resource-link" href="https://killercoda.com/killer-shell-cka" target="_blank">
+                        <span class="rl-type exo">Exercices</span><span class="rl-name">Killercoda — Scénarios interactifs K8s (prépa CKA)</span><span class="rl-duration">~20h</span>
+                    </a>
+                    <a class="resource-link" href="https://www.cncf.io/training/certification/cka/" target="_blank">
+                        <span class="rl-type cert">Cert.</span><span class="rl-name">CKA — Certified Kubernetes Administrator (CNCF officiel)</span><span class="rl-duration">Certification</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>4 semaines</strong></div>
+                <span class="cert-pill">CKA / CKAD</span>
+            </div>
+        </div>
+
+        <!-- Helm -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon k8s">⎈</div>
+                <div class="tech-track-meta">
+                    <h3>Helm 3</h3>
+                    <div class="version">Package manager Kubernetes — déploiement de la stack monitoring</div>
+                </div>
+                <span class="diff-badge intermediate">Intermédiaire</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Helm est utilisé pour déployer la stack Prometheus/Grafana (kube-prometheus-stack) et les charts applicatifs. Il simplifie la gestion des manifests K8s complexes.</p>
+                <ul class="concepts-list">
+                    <li>Charts &amp; templates</li><li>Values.yaml</li><li>helm install / upgrade</li>
+                    <li>Helm repositories</li><li>Subcharts &amp; dependencies</li>
+                    <li>Helm hooks</li><li>Helmfile</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://helm.sh/docs/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Helm — Documentation officielle (guide &amp; best practices)</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://helm.sh/docs/chart_template_guide/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Helm Chart Template Guide — Tutoriel officiel complet</span><span class="rl-duration">~5h</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=-ykwb1d0DXU" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Helm Crash Course — TechWorld with Nana (YouTube)</span><span class="rl-duration">1h15</span>
+                    </a>
+                    <a class="resource-link" href="https://artifacthub.io/" target="_blank">
+                        <span class="rl-type exo">Référence</span><span class="rl-name">ArtifactHub.io — Catalogue officiel de charts Helm publics</span><span class="rl-duration">Exploration</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>1 semaine</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PHASE 5 : OBSERVABILITÉ & ARCHITECTURE ── -->
+    <div class="section-title">Phase 5 — Observabilité &amp; Architecture Microservices</div>
+    <div class="grid grid-2">
+
+        <!-- Prometheus + Grafana -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon obs">📊</div>
+                <div class="tech-track-meta">
+                    <h3>Prometheus &amp; Grafana</h3>
+                    <div class="version">Stack monitoring — métriques applicatives via prom-client</div>
+                </div>
+                <span class="diff-badge intermediate">Intermédiaire</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Chaque service expose <code>/metrics</code> via <code>prom-client</code>. Prometheus scrape ces endpoints, Grafana visualise les dashboards. Déployés via le chart <code>kube-prometheus-stack</code>.</p>
+                <ul class="concepts-list">
+                    <li>Counter / Gauge / Histogram / Summary</li><li>Labels &amp; cardinality</li>
+                    <li>PromQL queries</li><li>Alertmanager rules</li>
+                    <li>Grafana dashboards</li><li>prom-client (Node.js)</li>
+                    <li>ServiceMonitor (K8s)</li><li>SLO / SLA / SLI</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://prometheus.io/docs/introduction/overview/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Prometheus — Documentation officielle &amp; getting started</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://grafana.com/docs/grafana/latest/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Grafana — Documentation officielle (dashboards &amp; alerting)</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=h4Sl21AKiDg" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Prometheus &amp; Grafana Tutorial — TechWorld with Nana (YouTube)</span><span class="rl-duration">1h</span>
+                    </a>
+                    <a class="resource-link" href="https://prometheus.io/docs/practices/naming/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">Prometheus — Best Practices (naming, histograms, alerting)</span><span class="rl-duration">Lecture</span>
+                    </a>
+                    <a class="resource-link" href="https://grafana.com/tutorials/" target="_blank">
+                        <span class="rl-type cours">Cours</span><span class="rl-name">Grafana Tutorials — Tutoriels officiels interactifs (gratuits)</span><span class="rl-duration">~8h</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>2 semaines</strong></div>
+            </div>
+        </div>
+
+        <!-- Architecture Microservices -->
+        <div class="tech-track">
+            <div class="tech-track-header">
+                <div class="tech-track-icon archi">🏗️</div>
+                <div class="tech-track-meta">
+                    <h3>Architecture Microservices</h3>
+                    <div class="version">Design patterns · Event-Driven · API Gateway · DDD</div>
+                </div>
+                <span class="diff-badge advanced">Avancé</span>
+            </div>
+            <div class="tech-track-body">
+                <p>Comprendre pourquoi la plateforme est découpée en 5 services indépendants, comment les patterns Saga, CQRS et Strangler Fig s'appliquent, et comment éviter les erreurs classiques des microservices.</p>
+                <ul class="concepts-list">
+                    <li>Bounded Context (DDD)</li><li>API Gateway pattern</li>
+                    <li>Saga pattern</li><li>CQRS</li><li>Event Sourcing</li>
+                    <li>Circuit Breaker</li><li>Service Discovery</li>
+                    <li>Strangler Fig pattern</li><li>Twelve-Factor App</li>
+                </ul>
+                <div class="resource-links">
+                    <a class="resource-link" href="https://microservices.io/patterns/index.html" target="_blank">
+                        <span class="rl-type docs">Référence</span><span class="rl-name">microservices.io — Catalogue de patterns (Chris Richardson)</span><span class="rl-duration">Référence</span>
+                    </a>
+                    <a class="resource-link" href="https://12factor.net/" target="_blank">
+                        <span class="rl-type book">Guide</span><span class="rl-name">The Twelve-Factor App — Manifeste des apps cloud-native</span><span class="rl-duration">Lecture</span>
+                    </a>
+                    <a class="resource-link" href="https://www.youtube.com/watch?v=lL_j7ilk7rc" target="_blank">
+                        <span class="rl-type video">Vidéo</span><span class="rl-name">Microservices Explained — TechWorld with Nana (YouTube)</span><span class="rl-duration">30min</span>
+                    </a>
+                    <a class="resource-link" href="https://samnewman.io/books/building_microservices/" target="_blank">
+                        <span class="rl-type book">Livre</span><span class="rl-name">Building Microservices — Sam Newman (O'Reilly, référence industrie)</span><span class="rl-duration">Livre</span>
+                    </a>
+                    <a class="resource-link" href="https://www.cncf.io/projects/" target="_blank">
+                        <span class="rl-type docs">Docs</span><span class="rl-name">CNCF Landscape — Écosystème cloud-native complet</span><span class="rl-duration">Exploration</span>
+                    </a>
+                </div>
+            </div>
+            <div class="tech-track-footer">
+                <div class="duration-pill">⏱ Durée recommandée : <strong>2 semaines</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLEAU DES CERTIFICATIONS -->
+    <div class="section-title">Certifications reconnues par l'industrie</div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Certification</th>
+                    <th>Organisme</th>
+                    <th>Technologie couverte</th>
+                    <th>Niveau</th>
+                    <th>Format</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>CKA</strong> — Certified Kubernetes Administrator</td>
+                    <td>CNCF / Linux Foundation</td>
+                    <td>Kubernetes</td>
+                    <td><span class="diff-badge advanced" style="font-size:0.78em">Avancé</span></td>
+                    <td>Examen pratique 2h</td>
+                </tr>
+                <tr>
+                    <td><strong>CKAD</strong> — Certified Kubernetes App Developer</td>
+                    <td>CNCF / Linux Foundation</td>
+                    <td>Kubernetes / Helm</td>
+                    <td><span class="diff-badge intermediate" style="font-size:0.78em">Intermédiaire</span></td>
+                    <td>Examen pratique 2h</td>
+                </tr>
+                <tr>
+                    <td><strong>Redis Certified Developer</strong></td>
+                    <td>Redis University</td>
+                    <td>Redis 7</td>
+                    <td><span class="diff-badge intermediate" style="font-size:0.78em">Intermédiaire</span></td>
+                    <td>QCM en ligne</td>
+                </tr>
+                <tr>
+                    <td><strong>Elastic Certified Engineer</strong></td>
+                    <td>Elastic</td>
+                    <td>Elasticsearch</td>
+                    <td><span class="diff-badge advanced" style="font-size:0.78em">Avancé</span></td>
+                    <td>Examen pratique 3h</td>
+                </tr>
+                <tr>
+                    <td><strong>Docker Certified Associate (DCA)</strong></td>
+                    <td>Docker Inc.</td>
+                    <td>Docker</td>
+                    <td><span class="diff-badge intermediate" style="font-size:0.78em">Intermédiaire</span></td>
+                    <td>QCM en ligne 90 min</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ORDRE DE PROGRESSION RECOMMANDÉ -->
+    <div class="alert info" style="margin-top: 32px;">
+        <span class="alert-icon">🎯</span>
+        <div>
+            <strong>Ordre de progression recommandé :</strong>
+            Node.js → Express.js → JWT/Sécurité → PostgreSQL → Redis → Docker → RabbitMQ → Elasticsearch → Kubernetes → Helm → Prometheus/Grafana → Architecture Microservices.
+            Commencez par faire tourner la stack localement (Docker Compose) avant d'aborder Kubernetes.
+        </div>
+    </div>
+</div>
+
+<!-- ──────────────────────────────────── TAB: TESTS EXPLOITANT -->
+<div id="tests-exploitant" class="tab-pane">
+    <div class="section-header">
+        <h2>Guide de Test Exploitant</h2>
+        <p>Procédures pas-à-pas pour vérifier le bon fonctionnement de chaque composant de la plateforme, en local (Docker Compose) et en cluster (Kubernetes).</p>
+    </div>
+
+    <!-- Légende -->
+    <div class="tests-legend">
+        <div class="tests-legend-item"><span class="tc-env local">Local</span> Docker Compose uniquement</div>
+        <div class="tests-legend-item"><span class="tc-env k8s">K8s</span> Kubernetes uniquement</div>
+        <div class="tests-legend-item"><span class="tc-env both">Both</span> Les deux environnements</div>
+        <div class="tests-legend-item"><span class="step-tool-badge curl">curl</span> Commande HTTP</div>
+        <div class="tests-legend-item"><span class="step-tool-badge kubectl">kubectl</span> CLI Kubernetes</div>
+        <div class="tests-legend-item"><span class="step-tool-badge browser">browser</span> Interface web</div>
+        <div class="tests-legend-item"><span class="step-tool-badge psql">psql</span> Client PostgreSQL</div>
+        <div class="tests-legend-item"><span class="step-tool-badge redis">redis-cli</span> Client Redis</div>
+    </div>
+
+    <!-- ── API GATEWAY ── -->
+    <div class="section-title">Services Applicatifs</div>
+
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(99,102,241,0.12)">🚪</div>
+            <div>
+                <h3>API Gateway</h3>
+                <div class="tc-sub">Point d'entrée unique — Routing, JWT, Rate Limiting</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:3000</span>
+                <span class="tc-env both">Both</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">api-gateway running</span>
+            <span class="prereq-tag">redis running</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Health check — vérifier que le gateway répond
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> http://localhost:3000/health | jq .
+
+<span class="cmd-comment"># En K8s (port-forward d'abord) :</span>
+<span class="cmd-kw">kubectl</span> port-forward svc/api-gateway 3000:3000 <span class="cmd-flag">-n</span> ecommerce
+<span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> http://localhost:3000/health | jq .</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>{"status":"ok","uptime":…,"timestamp":"…"}</code> — HTTP 200</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Vérifier le rejet d'une requête sans token JWT
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-o</span> /dev/null <span class="cmd-flag">-w</span> <span class="cmd-str">"%{http_code}"</span> \
+  http://localhost:3000/api/orders</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>401</code> — L'accès aux routes protégées est refusé sans Bearer token.</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si 200 :</strong> le middleware <code>express-jwt</code> n'est pas appliqué sur cette route. Vérifier <code>services/api-gateway/src/middleware/auth.js</code>.</div>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Tester le rate limiting (dépasse 100 req/min)
+                    <span class="step-tool-badge sh">sh</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Envoyer 110 requêtes en boucle sur /health</span>
+<span class="cmd-kw">for</span> i in $(seq 1 110); <span class="cmd-kw">do</span>
+  <span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-o</span> /dev/null <span class="cmd-flag">-w</span> <span class="cmd-str">"%{http_code}\n"</span> http://localhost:3000/health
+<span class="cmd-kw">done</span> | tail -5</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Les dernières lignes affichent <code>429 Too Many Requests</code>, confirmant que le rate limiter Redis est actif.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── USER SERVICE ── -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(99,102,241,0.12)">👤</div>
+            <div>
+                <h3>User Service</h3>
+                <div class="tc-sub">Authentification, inscription, sessions JWT</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:3002</span>
+                <span class="tc-env both">Both</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">user-service running</span>
+            <span class="prereq-tag">postgres running</span>
+            <span class="prereq-tag">redis running</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Inscrire un utilisateur test
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-X</span> POST http://localhost:3000/api/users/register \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Content-Type: application/json"</span> \
+  <span class="cmd-flag">-d</span> <span class="cmd-str">'{"email":"test-ops@platform.local","password":"Test1234!","name":"Ops Tester"}'</span> \
+  | jq .</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>{"id":…,"email":"test-ops@platform.local","createdAt":"…"}</code> — HTTP 201</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Se connecter et récupérer un JWT valide
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Stocker le token dans une variable shell</span>
+TOKEN=$(<span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-X</span> POST http://localhost:3000/api/users/login \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Content-Type: application/json"</span> \
+  <span class="cmd-flag">-d</span> <span class="cmd-str">'{"email":"test-ops@platform.local","password":"Test1234!"}'</span> \
+  | jq <span class="cmd-flag">-r</span> .token)
+
+echo $TOKEN | cut -c1-30  <span class="cmd-comment"># Afficher les 30 premiers caractères</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>La variable <code>$TOKEN</code> commence par <code>eyJ</code> (base64 d'un JWT) — HTTP 200.</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si token vide :</strong> vérifier que <code>JWT_SECRET</code> est bien défini dans le <code>.env</code> du user-service et redémarrer le conteneur.</div>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Accéder au profil avec le token
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> http://localhost:3000/api/users/profile \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Authorization: Bearer $TOKEN"</span> | jq .</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>{"id":…,"email":"test-ops@platform.local","name":"Ops Tester"}</code> — HTTP 200</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PRODUCT SERVICE ── -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(16,185,129,0.12)">📦</div>
+            <div>
+                <h3>Product Service</h3>
+                <div class="tc-sub">Catalogue, cache Redis (TTL 1h), recherche Elasticsearch</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:3001</span>
+                <span class="tc-env both">Both</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">product-service running</span>
+            <span class="prereq-tag">postgres running</span>
+            <span class="prereq-tag">redis running</span>
+            <span class="prereq-tag">$TOKEN valide</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Lister les produits (premier appel — cache miss)
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> http://localhost:3000/api/products?page=1&amp;limit=5 \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Authorization: Bearer $TOKEN"</span> | jq .</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Tableau JSON de produits avec pagination. L'en-tête de réponse <code>X-Cache: MISS</code> confirme l'accès à PostgreSQL.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Vérifier le cache Redis (second appel — cache hit)
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Relancer la même requête — doit être plus rapide</span>
+<span class="cmd-kw">time curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-o</span> /dev/null \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Authorization: Bearer $TOKEN"</span> \
+  http://localhost:3000/api/products?page=1&amp;limit=5
+
+<span class="cmd-comment"># Vérifier la clé dans Redis directement :</span>
+<span class="cmd-kw">docker exec</span> ecommerce-redis redis-cli KEYS <span class="cmd-str">"products:*"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>X-Cache: HIT</code> dans les headers. La commande Redis retourne la clé <code>products:page:1:limit:5</code> avec un TTL ≤ 3600s.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Créer un produit test
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-X</span> POST http://localhost:3000/api/products \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Authorization: Bearer $TOKEN"</span> \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Content-Type: application/json"</span> \
+  <span class="cmd-flag">-d</span> <span class="cmd-str">'{"name":"Test-Ops-Product","price":9.99,"stock":50,"category":"test"}'</span> \
+  | jq .id</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Un UUID ou entier numérique — HTTP 201. Mémoriser ce <code>PRODUCT_ID</code> pour les tests Order.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── ORDER SERVICE ── -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(245,158,11,0.12)">🛒</div>
+            <div>
+                <h3>Order Service</h3>
+                <div class="tc-sub">Création de commandes, publication événement RabbitMQ</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:3003</span>
+                <span class="tc-env both">Both</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">order-service running</span>
+            <span class="prereq-tag">rabbitmq running</span>
+            <span class="prereq-tag">postgres running</span>
+            <span class="prereq-tag">$TOKEN + $PRODUCT_ID valides</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Passer une commande et déclencher l'événement
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd">ORDER_ID=$(<span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-X</span> POST http://localhost:3000/api/orders \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Authorization: Bearer $TOKEN"</span> \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Content-Type: application/json"</span> \
+  <span class="cmd-flag">-d</span> <span class="cmd-str">"{\"items\":[{\"productId\":\"$PRODUCT_ID\",\"qty\":2}]}"</span> \
+  | jq <span class="cmd-flag">-r</span> .orderId)
+
+echo "Order créé : $ORDER_ID"</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>Order créé : ord_xxxxx</code> — HTTP 201. L'événement <code>order.created</code> est publié dans l'exchange RabbitMQ <code>orders</code>.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Consulter le statut de la commande
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> http://localhost:3000/api/orders/$ORDER_ID \
+  <span class="cmd-flag">-H</span> <span class="cmd-str">"Authorization: Bearer $TOKEN"</span> | jq .status</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>"pending"</code> — La commande est créée, en attente de confirmation de paiement.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Vérifier que l'événement a transité dans RabbitMQ
+                    <span class="step-tool-badge browser">browser</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Ouvrir dans le navigateur :</span>
+<span class="cmd-comment"># http://localhost:15672</span>
+<span class="cmd-comment"># Login : guest / guest</span>
+<span class="cmd-comment"># Aller dans : Exchanges → orders → Bindings</span>
+<span class="cmd-comment"># Puis : Queues → orders.notifications → Get messages</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>La queue <code>orders.notifications</code> a consommé 1 message (ready = 0, unacked = 0). L'onglet <strong>Overview</strong> montre un pic de message rate.</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si le message reste en ready :</strong> le Notification Service est arrêté ou son consumer est crashé. Vérifier <code>docker-compose logs notification-service</code>.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── NOTIFICATION SERVICE ── -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(6,182,212,0.12)">📧</div>
+            <div>
+                <h3>Notification Service</h3>
+                <div class="tc-sub">Consumer RabbitMQ → envoi email via Nodemailer / MailHog</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:3004</span>
+                <span class="tc-env both">Both</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">notification-service running</span>
+            <span class="prereq-tag">mailhog running</span>
+            <span class="prereq-tag">commande créée (étape Order)</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Vérifier l'email reçu dans MailHog
+                    <span class="step-tool-badge browser">browser</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Ouvrir : http://localhost:8025</span>
+<span class="cmd-comment"># L'interface MailHog affiche les emails capturés.</span>
+<span class="cmd-comment"># Rechercher un mail avec l'objet "Confirmation de commande"</span>
+<span class="cmd-comment"># adressé à test-ops@platform.local</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Un email HTML avec le numéro de commande <code>$ORDER_ID</code>, les articles commandés et le total. Délai &lt; 5 secondes après la création de commande.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Valider via l'API REST de MailHog
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> http://localhost:8025/api/v2/messages?limit=1 \
+  | jq <span class="cmd-str">'.items[0] | {subject: .Content.Headers.Subject, to: .Content.Headers.To}'</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>{"subject":["Confirmation de commande #…"],"to":["test-ops@platform.local"]}</code></p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Tester la résilience (Dead Letter Queue)
+                    <span class="step-tool-badge sh">sh</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Arrêter le notification-service pour simuler une panne</span>
+<span class="cmd-kw">docker-compose stop</span> notification-service
+
+<span class="cmd-comment"># Créer une nouvelle commande — le message doit rester dans la queue</span>
+<span class="cmd-comment"># Redémarrer le service</span>
+<span class="cmd-kw">docker-compose start</span> notification-service
+
+<span class="cmd-comment"># Vérifier que l'email est bien arrivé après redémarrage</span>
+<span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> http://localhost:8025/api/v2/messages?limit=2 | jq length</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>2</code> — Le message RabbitMQ a survécu à l'arrêt du consumer grâce à la persistance de queue.</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si le message est perdu :</strong> vérifier que la queue est créée avec <code>durable: true</code> dans le code du producer (Order Service).</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── INFRASTRUCTURE DE DONNÉES ── -->
+    <div class="section-title">Infrastructure de Données</div>
+
+    <!-- ── POSTGRESQL ── -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(50,103,145,0.18)">🐘</div>
+            <div>
+                <h3>PostgreSQL 15</h3>
+                <div class="tc-sub">Base transactionnelle principale — intégrité, index, requêtes</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:5432</span>
+                <span class="tc-env both">Both</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">postgres running</span>
+            <span class="prereq-tag">psql ou docker exec</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Vérifier la connectivité et les bases disponibles
+                    <span class="step-tool-badge psql">psql</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Via Docker Compose :</span>
+<span class="cmd-kw">docker exec</span> <span class="cmd-flag">-it</span> ecommerce-postgres psql <span class="cmd-flag">-U</span> postgres <span class="cmd-flag">-c</span> <span class="cmd-str">"\l"</span>
+
+<span class="cmd-comment"># En K8s :</span>
+<span class="cmd-kw">kubectl exec</span> <span class="cmd-flag">-it</span> postgres-0 <span class="cmd-flag">-n</span> data <span class="cmd-flag">--</span> \
+  psql <span class="cmd-flag">-U</span> postgres <span class="cmd-flag">-c</span> <span class="cmd-str">"\l"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Liste incluant les bases <code>ecommerce</code> (ou <code>users_db</code>, <code>products_db</code>, <code>orders_db</code> selon la config multi-DB).</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Vérifier les tables et le nombre d'enregistrements
+                    <span class="step-tool-badge psql">psql</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">docker exec</span> ecommerce-postgres psql <span class="cmd-flag">-U</span> postgres <span class="cmd-flag">-d</span> ecommerce <span class="cmd-flag">-c</span> \
+  <span class="cmd-str">"SELECT table_name, pg_relation_size(quote_ident(table_name)) AS bytes
+   FROM information_schema.tables
+   WHERE table_schema = 'public'
+   ORDER BY bytes DESC;"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Tableau listant <code>users</code>, <code>products</code>, <code>orders</code>, <code>order_items</code> avec leur taille en bytes. Aucune table ne doit manquer.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Tester les performances avec EXPLAIN ANALYZE
+                    <span class="step-tool-badge psql">psql</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">docker exec</span> ecommerce-postgres psql <span class="cmd-flag">-U</span> postgres <span class="cmd-flag">-d</span> ecommerce <span class="cmd-flag">-c</span> \
+  <span class="cmd-str">"EXPLAIN ANALYZE SELECT * FROM orders WHERE status = 'pending' LIMIT 10;"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Plan affichant <code>Index Scan</code> (pas de <code>Seq Scan</code>) sur la colonne <code>status</code>. Execution Time &lt; 10ms en dev.</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si Seq Scan :</strong> l'index sur <code>orders.status</code> est absent. Le créer avec <code>CREATE INDEX idx_orders_status ON orders(status);</code>.</div>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">4</div>
+                    Vérifier les connexions actives (pool monitoring)
+                    <span class="step-tool-badge psql">psql</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">docker exec</span> ecommerce-postgres psql <span class="cmd-flag">-U</span> postgres <span class="cmd-flag">-c</span> \
+  <span class="cmd-str">"SELECT count(*), state FROM pg_stat_activity GROUP BY state;"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Nombre de connexions <code>active</code> &lt; 80% du <code>max_connections</code> (défaut 100). Pas de connexions en état <code>idle in transaction</code> trop longtemps.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── REDIS ── -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(220,53,69,0.12)">⚡</div>
+            <div>
+                <h3>Redis 7</h3>
+                <div class="tc-sub">Cache distribué, sessions, rate limiting — TTL &amp; éviction</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:6379</span>
+                <span class="tc-env both">Both</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">redis running</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    PING — vérifier que Redis répond
+                    <span class="step-tool-badge redis">redis-cli</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">docker exec</span> ecommerce-redis redis-cli PING
+
+<span class="cmd-comment"># En K8s :</span>
+<span class="cmd-kw">kubectl exec</span> <span class="cmd-flag">-it</span> redis-0 <span class="cmd-flag">-n</span> data <span class="cmd-flag">--</span> redis-cli PING</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>PONG</code></p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Inspecter les clés actives et leurs TTL
+                    <span class="step-tool-badge redis">redis-cli</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Lister toutes les clés (prod : utiliser SCAN à la place)</span>
+<span class="cmd-kw">docker exec</span> ecommerce-redis redis-cli KEYS <span class="cmd-str">"*"</span>
+
+<span class="cmd-comment"># Voir le TTL d'une clé de session (remplacer KEY par la clé réelle)</span>
+<span class="cmd-kw">docker exec</span> ecommerce-redis redis-cli TTL <span class="cmd-str">"session:USER_ID"</span>
+
+<span class="cmd-comment"># Voir le TTL d'un cache produit</span>
+<span class="cmd-kw">docker exec</span> ecommerce-redis redis-cli TTL <span class="cmd-str">"products:page:1:limit:5"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Sessions : TTL entre 0 et 86400 (24h). Cache produits : TTL entre 0 et 3600 (1h). Une valeur <code>-1</code> indique une clé sans expiration (à investiguer).</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Contrôler l'utilisation mémoire et la politique d'éviction
+                    <span class="step-tool-badge redis">redis-cli</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">docker exec</span> ecommerce-redis redis-cli INFO memory \
+  | grep <span class="cmd-flag">-E</span> <span class="cmd-str">"used_memory_human|maxmemory_human|mem_fragmentation_ratio|maxmemory_policy"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>maxmemory_policy: allkeys-lru</code>. Mémoire utilisée &lt; 80% du <code>maxmemory</code> configuré (512 MB). <code>mem_fragmentation_ratio</code> entre 1.0 et 1.5.</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si fragmentation &gt; 2.0 :</strong> Redis souffre de fragmentation mémoire. Lancer <code>MEMORY PURGE</code> ou redémarrer Redis en heure creuse.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── RABBITMQ ── -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(255,102,0,0.12)">🐰</div>
+            <div>
+                <h3>RabbitMQ 3</h3>
+                <div class="tc-sub">Message broker AMQP — exchanges, queues, DLQ, persistance</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:5672 / :15672</span>
+                <span class="tc-env both">Both</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">rabbitmq running</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Vérifier l'état du broker via l'API de management
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-u</span> guest:guest \
+  http://localhost:15672/api/healthchecks/node | jq .status</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>"ok"</code></p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Lister les queues et leur nombre de messages
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-flag">-u</span> guest:guest \
+  http://localhost:15672/api/queues | \
+  jq <span class="cmd-str">'.[].{name,messages,consumers}'</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p><code>orders.notifications</code> avec <code>consumers: 1</code> (le Notification Service). <code>messages: 0</code> indique que tout a été consommé.</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si consumers = 0 :</strong> le Notification Service n'est pas connecté à RabbitMQ. Vérifier la variable <code>RABBITMQ_URL</code> dans son environnement.</div>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Publier un message de test manuellement
+                    <span class="step-tool-badge amqp">amqp</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Via l'interface web : http://localhost:15672</span>
+<span class="cmd-comment"># Exchanges → orders → Publish message</span>
+<span class="cmd-comment"># Routing key : order.created</span>
+<span class="cmd-comment"># Payload JSON :</span>
+<span class="cmd-str">{
+  "orderId": "test-manual-001",
+  "userId": 1,
+  "email": "test-ops@platform.local",
+  "items": [{"productId": "p1", "qty": 1, "price": 9.99}]
+}</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Un email de confirmation apparaît dans MailHog (:8025) dans les 5 secondes. La queue <code>orders.notifications</code> repasse à 0 messages.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── KUBERNETES ── -->
+    <div class="section-title">Orchestration Kubernetes</div>
+
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(50,108,229,0.12)">☸️</div>
+            <div>
+                <h3>Cluster Kubernetes</h3>
+                <div class="tc-sub">Santé des pods, résilience, auto-scaling, secrets</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-env k8s">K8s</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">minikube ou cluster actif</span>
+            <span class="prereq-tag">kubectl configuré</span>
+            <span class="prereq-tag">namespaces ecommerce + data créés</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Vérifier que tous les pods sont Running
+                    <span class="step-tool-badge kubectl">kubectl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">kubectl</span> get pods <span class="cmd-flag">-n</span> ecommerce <span class="cmd-flag">-o</span> wide
+<span class="cmd-kw">kubectl</span> get pods <span class="cmd-flag">-n</span> data <span class="cmd-flag">-o</span> wide
+
+<span class="cmd-comment"># Vue consolidée tous namespaces :</span>
+<span class="cmd-kw">kubectl</span> get pods <span class="cmd-flag">--all-namespaces</span> | grep <span class="cmd-flag">-v</span> Running</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Tous les pods en état <code>Running</code> avec <code>READY = 1/1</code>. La dernière commande ne retourne rien (aucun pod en erreur).</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si CrashLoopBackOff :</strong> <code>kubectl logs &lt;pod&gt; -n ecommerce --previous</code> pour lire les logs du dernier crash.</div>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Tester la résilience (auto-healing)
+                    <span class="step-tool-badge kubectl">kubectl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Supprimer un pod du product-service</span>
+<span class="cmd-kw">kubectl</span> delete pod <span class="cmd-flag">-l</span> app=product-service <span class="cmd-flag">-n</span> ecommerce
+
+<span class="cmd-comment"># Surveiller la recréation immédiate</span>
+<span class="cmd-kw">kubectl</span> get pods <span class="cmd-flag">-l</span> app=product-service <span class="cmd-flag">-n</span> ecommerce <span class="cmd-flag">-w</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Le nouveau pod passe de <code>Pending</code> → <code>ContainerCreating</code> → <code>Running</code> en moins de 30 secondes. Le ReplicaSet a auto-recréé l'instance.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Vérifier les Readiness &amp; Liveness Probes
+                    <span class="step-tool-badge kubectl">kubectl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">kubectl</span> describe pod <span class="cmd-flag">-l</span> app=api-gateway <span class="cmd-flag">-n</span> ecommerce \
+  | grep <span class="cmd-flag">-A</span> 5 <span class="cmd-str">"Liveness\|Readiness"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Probes configurées sur <code>/health</code>. Pas d'événements <code>Unhealthy</code> dans la section <code>Events</code>.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">4</div>
+                    Inspecter les Secrets et ConfigMaps injectés
+                    <span class="step-tool-badge kubectl">kubectl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Lister les ConfigMaps</span>
+<span class="cmd-kw">kubectl</span> get configmaps <span class="cmd-flag">-n</span> ecommerce
+
+<span class="cmd-comment"># Vérifier qu'un secret existe (sans afficher sa valeur)</span>
+<span class="cmd-kw">kubectl</span> get secret app-secrets <span class="cmd-flag">-n</span> ecommerce \
+  <span class="cmd-flag">-o</span> jsonpath=<span class="cmd-str">'{.data}'</span> | jq <span class="cmd-str">'keys'</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Les clés <code>JWT_SECRET</code>, <code>DB_PASSWORD</code>, <code>REDIS_PASSWORD</code> apparaissent dans la liste sans que leurs valeurs soient exposées.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">5</div>
+                    Valider l'HPA (auto-scaling)
+                    <span class="step-tool-badge kubectl">kubectl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-kw">kubectl</span> get hpa <span class="cmd-flag">-n</span> ecommerce
+
+<span class="cmd-comment"># Détail de l'HPA du product-service</span>
+<span class="cmd-kw">kubectl</span> describe hpa product-service-hpa <span class="cmd-flag">-n</span> ecommerce</div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Colonne <code>TARGETS</code> affiche la charge CPU actuelle vs le seuil (ex: <code>12%/70%</code>). Replicas entre <code>MINPODS</code> et <code>MAXPODS</code>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PROMETHEUS + GRAFANA ── -->
+    <div class="section-title">Observabilité</div>
+
+    <div class="test-card">
+        <div class="test-card-header">
+            <div class="test-card-icon" style="background:rgba(229,96,10,0.12)">📊</div>
+            <div>
+                <h3>Prometheus &amp; Grafana</h3>
+                <div class="tc-sub">Métriques applicatives, dashboards, alertes</div>
+            </div>
+            <div class="tc-badges">
+                <span class="tc-port">:9090 / :3100</span>
+                <span class="tc-env k8s">K8s</span>
+            </div>
+        </div>
+        <div class="prereq-bar">
+            <span class="pb-label">⚙ Prérequis :</span>
+            <span class="prereq-tag">kube-prometheus-stack déployé</span>
+            <span class="prereq-tag">services exposant /metrics</span>
+        </div>
+        <div class="test-steps">
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">1</div>
+                    Vérifier que Prometheus scrape les services
+                    <span class="step-tool-badge browser">browser</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Port-forward Prometheus :</span>
+<span class="cmd-kw">kubectl</span> port-forward svc/prometheus-operated 9090:9090 <span class="cmd-flag">-n</span> monitoring
+
+<span class="cmd-comment"># Ouvrir : http://localhost:9090/targets</span>
+<span class="cmd-comment"># Tous les targets ecommerce/* doivent être en état "UP"</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Chaque service (api-gateway, product-service, etc.) apparaît avec <code>State: UP</code>. Le <code>Last Scrape</code> est récent (&lt; 30s).</p>
+                </div>
+                <div class="test-tip">
+                    <span class="tt-icon">⚠</span>
+                    <div><strong>Si DOWN :</strong> le service n'expose pas <code>/metrics</code> ou le <code>ServiceMonitor</code> K8s est mal configuré (vérifier le label <code>release: monitoring</code>).</div>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">2</div>
+                    Exécuter une requête PromQL de santé
+                    <span class="step-tool-badge curl">curl</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Taux de requêtes HTTP des dernières 5 minutes :</span>
+<span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-str">'http://localhost:9090/api/v1/query?query=rate(http_requests_total[5m])'</span> \
+  | jq <span class="cmd-str">'.data.result | length'</span>
+
+<span class="cmd-comment"># Latence p95 :</span>
+<span class="cmd-kw">curl</span> <span class="cmd-flag">-s</span> <span class="cmd-str">'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,rate(http_request_duration_seconds_bucket[5m]))'</span> \
+  | jq <span class="cmd-str">'.data.result[0].value[1]'</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>Premier résultat : entier &gt; 0 (séries actives). Latence p95 &lt; <code>"0.2"</code> secondes en conditions normales.</p>
+                </div>
+            </div>
+
+            <div class="test-step">
+                <div class="test-step-label">
+                    <div class="step-num">3</div>
+                    Accéder aux dashboards Grafana
+                    <span class="step-tool-badge browser">browser</span>
+                </div>
+                <div class="test-cmd"><span class="cmd-comment"># Port-forward Grafana :</span>
+<span class="cmd-kw">kubectl</span> port-forward svc/monitoring-grafana 3100:80 <span class="cmd-flag">-n</span> monitoring
+
+<span class="cmd-comment"># Ouvrir : http://localhost:3100</span>
+<span class="cmd-comment"># Login par défaut : admin / prom-operator</span>
+<span class="cmd-comment"># Dashboards à vérifier :</span>
+<span class="cmd-comment">#   - Kubernetes / Compute Resources / Namespace (ecommerce)</span>
+<span class="cmd-comment">#   - Node Exporter / USE Method</span>
+<span class="cmd-comment">#   - E-Commerce Platform Overview (dashboard custom)</span></div>
+                <div class="expected-output">
+                    <div class="eo-label">✔ Résultat attendu</div>
+                    <p>CPU &lt; 70%, Mémoire &lt; 80%, 0 alertes actives en conditions normales. Les graphiques de latence montrent des valeurs stables.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHECKLIST GLOBALE -->
+    <div class="section-title">Checklist de validation globale</div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Composant</th>
+                    <th>Test rapide</th>
+                    <th>Signal OK</th>
+                    <th>Env.</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>API Gateway</strong></td><td><code>curl localhost:3000/health</code></td><td>HTTP 200 + <code>{"status":"ok"}</code></td><td><span class="tc-env both" style="font-size:0.7em">Both</span></td></tr>
+                <tr><td><strong>User Service</strong></td><td>POST /api/users/login</td><td>HTTP 200 + token JWT</td><td><span class="tc-env both" style="font-size:0.7em">Both</span></td></tr>
+                <tr><td><strong>Product Service</strong></td><td>GET /api/products</td><td>HTTP 200 + tableau JSON</td><td><span class="tc-env both" style="font-size:0.7em">Both</span></td></tr>
+                <tr><td><strong>Order Service</strong></td><td>POST /api/orders</td><td>HTTP 201 + orderId</td><td><span class="tc-env both" style="font-size:0.7em">Both</span></td></tr>
+                <tr><td><strong>Notification Service</strong></td><td>Email dans MailHog :8025</td><td>Mail reçu &lt; 5s</td><td><span class="tc-env both" style="font-size:0.7em">Both</span></td></tr>
+                <tr><td><strong>PostgreSQL</strong></td><td><code>redis-cli PING</code> → <code>docker exec psql -c "\l"</code></td><td>Tables présentes</td><td><span class="tc-env both" style="font-size:0.7em">Both</span></td></tr>
+                <tr><td><strong>Redis</strong></td><td><code>docker exec redis-cli PING</code></td><td><code>PONG</code></td><td><span class="tc-env both" style="font-size:0.7em">Both</span></td></tr>
+                <tr><td><strong>RabbitMQ</strong></td><td>GET /api/healthchecks/node</td><td><code>{"status":"ok"}</code></td><td><span class="tc-env both" style="font-size:0.7em">Both</span></td></tr>
+                <tr><td><strong>Pods K8s</strong></td><td><code>kubectl get pods -A | grep -v Running</code></td><td>Aucune ligne retournée</td><td><span class="tc-env k8s" style="font-size:0.7em">K8s</span></td></tr>
+                <tr><td><strong>Prometheus</strong></td><td>:9090/targets — tous UP</td><td>0 targets DOWN</td><td><span class="tc-env k8s" style="font-size:0.7em">K8s</span></td></tr>
+                <tr><td><strong>Grafana</strong></td><td>Dashboard affiché sans erreur</td><td>Métriques visibles</td><td><span class="tc-env k8s" style="font-size:0.7em">K8s</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alert success" style="margin-top: 28px;">
+        <span class="alert-icon">✅</span>
+        <div><strong>Conseil d'exploitation :</strong> Automatisez la checklist ci-dessus dans un script <code>healthcheck.sh</code> que vous exécutez après chaque déploiement. Redirigez la sortie vers Slack ou PagerDuty pour alerter l'équipe en cas d'échec.</div>
     </div>
 </div>
 
@@ -1949,6 +4159,51 @@ function startArchDiagram() {
 
     frame();
 }
+
+// ─── COPY BUTTONS ─────────────────────────────────────────────────────────────
+(function () {
+    const ICON_COPY = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+    const ICON_OK   = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    document.querySelectorAll('.test-cmd').forEach(function (cmd) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'test-cmd-wrapper';
+        cmd.parentNode.insertBefore(wrapper, cmd);
+        wrapper.appendChild(cmd);
+
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.innerHTML = ICON_COPY + '<span>Copier</span>';
+        btn.title = 'Copier la commande';
+        wrapper.appendChild(btn);
+
+        btn.addEventListener('click', function () {
+            const text = cmd.innerText;
+            navigator.clipboard.writeText(text).then(function () {
+                btn.innerHTML = ICON_OK + '<span>Copié !</span>';
+                btn.classList.add('copied');
+                setTimeout(function () {
+                    btn.innerHTML = ICON_COPY + '<span>Copier</span>';
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(function () {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                btn.innerHTML = ICON_OK + '<span>Copié !</span>';
+                btn.classList.add('copied');
+                setTimeout(function () {
+                    btn.innerHTML = ICON_COPY + '<span>Copier</span>';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+    });
+}());
 </script>
 </body>
 </html>
