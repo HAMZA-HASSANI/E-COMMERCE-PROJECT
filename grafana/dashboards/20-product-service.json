@@ -1,0 +1,117 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "panels": [
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"content": "## 20 — Product Service · Méthode RED + Cache\n**Rate** · **Errors** · **Duration** · **Cache Redis** : hit rate objectif > 90%", "mode": "markdown"},
+      "title": "", "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "reqps", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}},
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 2}, "id": 2,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rate(product_service_http_requests_total[5m]))", "legendFormat": "req/s", "refId": "A"}],
+      "title": "Rate — req/s", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.01}, {"color": "red", "value": 0.05}]}}},
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 2}, "id": 3,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rate(product_service_http_requests_total{status_code=~\"5..\"}[5m])) / clamp_min(sum(rate(product_service_http_requests_total[5m])), 0.001)", "legendFormat": "Erreurs 5xx", "refId": "A"}],
+      "title": "Errors — taux 5xx", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "s",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.3}, {"color": "red", "value": 1}]}}},
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 2}, "id": 4,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "histogram_quantile(0.95, sum(rate(product_service_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95", "refId": "A"}],
+      "title": "Duration — p95", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.5}, {"color": "green", "value": 0.9}]}}},
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 2}, "id": 5,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rate(product_service_cache_hits_total[5m])) / clamp_min(sum(rate(product_service_cache_hits_total[5m])) + sum(rate(product_service_cache_misses_total[5m])), 0.001)", "legendFormat": "Hit Ratio", "refId": "A"}],
+      "title": "Cache Hit Ratio (objectif > 90%)", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "reqps"}},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 6}, "id": 6,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "sum by (route) (rate(product_service_http_requests_total[5m]))", "legendFormat": "{{route}}", "refId": "A"}],
+      "title": "Rate — req/s par endpoint", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "reqps"}},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 6}, "id": 7,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "sum by (status_code) (rate(product_service_http_requests_total{status_code=~\"[45]..\"}[5m]))", "legendFormat": "HTTP {{status_code}}", "refId": "A"}],
+      "title": "Errors — codes 4xx/5xx", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "s"}},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 6}, "id": 8,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, sum(rate(product_service_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum(rate(product_service_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95", "refId": "B"},
+        {"expr": "histogram_quantile(0.99, sum(rate(product_service_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99", "refId": "C"}
+      ],
+      "title": "Duration — p50 / p95 / p99", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "ops"}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14}, "id": 9,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [
+        {"expr": "rate(product_service_cache_hits_total[5m])", "legendFormat": "Cache Hits/s", "refId": "A"},
+        {"expr": "rate(product_service_cache_misses_total[5m])", "legendFormat": "Cache Misses/s", "refId": "B"}
+      ],
+      "title": "Cache Redis — Hits vs Misses/s", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "bytes"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14}, "id": 10,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [
+        {"expr": "product_service_nodejs_heap_size_used_bytes", "legendFormat": "Heap used", "refId": "A"},
+        {"expr": "product_service_nodejs_heap_size_total_bytes", "legendFormat": "Heap total", "refId": "B"}
+      ],
+      "title": "Node.js — Heap Memory", "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "s",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.05}, {"color": "red", "value": 0.2}]}}},
+      "gridPos": {"h": 6, "w": 24, "x": 0, "y": 22}, "id": 11,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "product_service_nodejs_eventloop_lag_seconds", "legendFormat": "Event loop lag", "refId": "A"}],
+      "title": "Node.js — Event Loop Lag", "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 36,
+  "tags": ["service", "RED", "product"],
+  "time": {"from": "now-1h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "20 - Product Service",
+  "uid": "svc-product-service",
+  "version": 1
+}

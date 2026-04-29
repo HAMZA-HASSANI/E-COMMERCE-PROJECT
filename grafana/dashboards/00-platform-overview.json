@@ -1,0 +1,173 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "panels": [
+    {
+      "gridPos": {"h": 2, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "options": {
+        "content": "## 00 — Platform Overview · Four Golden Signals\n**Audience**: NOC / Management · **Méthode**: Google SRE · **Refresh**: 30s · Drill-down → dossiers Services, Data Layer",
+        "mode": "markdown"
+      },
+      "title": "",
+      "type": "text"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [{"options": {"0": {"color": "red", "index": 0, "text": "DOWN"}, "1": {"color": "green", "index": 1, "text": "UP"}}, "type": "value"}],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+        }
+      },
+      "gridPos": {"h": 4, "w": 14, "x": 0, "y": 2},
+      "id": 2,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value_and_name"},
+      "targets": [
+        {"expr": "up{job=\"api-gateway\"}", "legendFormat": "API Gateway", "refId": "A"},
+        {"expr": "up{job=\"product-service\"}", "legendFormat": "Product", "refId": "B"},
+        {"expr": "up{job=\"user-service\"}", "legendFormat": "User", "refId": "C"},
+        {"expr": "up{job=\"order-service\"}", "legendFormat": "Order", "refId": "D"},
+        {"expr": "up{job=\"notification-service\"}", "legendFormat": "Notification", "refId": "E"}
+      ],
+      "title": "Services",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [{"options": {"0": {"color": "red", "index": 0, "text": "DOWN"}, "1": {"color": "green", "index": 1, "text": "UP"}}, "type": "value"}],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+        }
+      },
+      "gridPos": {"h": 4, "w": 10, "x": 14, "y": 2},
+      "id": 3,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value_and_name"},
+      "targets": [
+        {"expr": "pg_up", "legendFormat": "PostgreSQL", "refId": "A"},
+        {"expr": "redis_up", "legendFormat": "Redis", "refId": "B"},
+        {"expr": "rabbitmq_up", "legendFormat": "RabbitMQ", "refId": "C"}
+      ],
+      "title": "Infrastructure",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "reqps"}
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 6},
+      "id": 4,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "job:http_requests_total:rate5m", "legendFormat": "{{job}}", "refId": "A"}],
+      "title": "Traffic — req/s par service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "percentunit",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.01}, {"color": "red", "value": 0.05}]}}
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 6},
+      "id": 5,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "job:http_error_ratio_5xx:ratio5m", "legendFormat": "{{job}}", "refId": "A"}],
+      "title": "Erreurs — taux 5xx",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {
+        "defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "s",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.5}, {"color": "red", "value": 1}]}}
+      },
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 6},
+      "id": 6,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "job:http_request_duration_seconds:p95", "legendFormat": "{{job}}", "refId": "A"}],
+      "title": "Latence — p95 par service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}},
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 14},
+      "id": 7,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "increase(order_service_orders_created_total[1h])", "legendFormat": "Commandes", "refId": "A"}],
+      "title": "Commandes (dernière heure)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}},
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 14},
+      "id": 8,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "increase(notification_service_emails_sent_total[1h])", "legendFormat": "Emails", "refId": "A"}],
+      "title": "Emails envoyés (dernière heure)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "yellow", "value": 0.5}, {"color": "green", "value": 0.9}]}}},
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 14},
+      "id": 9,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rate(product_service_cache_hits_total[5m])) / clamp_min(sum(rate(product_service_cache_hits_total[5m])) + sum(rate(product_service_cache_misses_total[5m])), 0.001)", "legendFormat": "Hit Ratio", "refId": "A"}],
+      "title": "Cache Hit Ratio (Redis)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 5}, {"color": "red", "value": 50}]}}},
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 14},
+      "id": 10,
+      "options": {"colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(rabbitmq_queue_messages_ready)", "legendFormat": "Messages prêts", "refId": "A"}],
+      "title": "RabbitMQ — Messages en attente",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "percentunit",
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.1}, {"color": "red", "value": 0.2}]}}},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
+      "id": 11,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [{"expr": "job:http_error_ratio_4xx:ratio5m", "legendFormat": "{{job}}", "refId": "A"}],
+      "title": "Taux d'erreurs 4xx par service",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "s"}},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18},
+      "id": 12,
+      "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
+      "targets": [
+        {"expr": "job:http_request_duration_seconds:p50", "legendFormat": "p50 — {{job}}", "refId": "A"},
+        {"expr": "job:http_request_duration_seconds:p99", "legendFormat": "p99 — {{job}}", "refId": "B"}
+      ],
+      "title": "Latence p50 / p99 globale",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 36,
+  "tags": ["overview", "golden-signals"],
+  "time": {"from": "now-1h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "00 - Platform Overview",
+  "uid": "platform-overview",
+  "version": 1
+}

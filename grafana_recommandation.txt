@@ -1,0 +1,233 @@
+Recommandations & Structure d'un dashboarding Grafana + Prometheus en production
+1. Méthodologies à appliquer
+Trois frameworks complémentaires à combiner :
+
+RED Method (pour les services applicatifs — User, Product, Order, Notification) : Rate (req/s), Errors (% 5xx/4xx), Duration (latence p50/p95/p99).
+USE Method (pour les ressources — PostgreSQL, Redis, RabbitMQ, hôtes) : Utilization, Saturation, Errors.
+Four Golden Signals (Google SRE) : Latency, Traffic, Errors, Saturation — vue transverse, particulièrement pour l'API Gateway.
+
+Règle simple : un service → RED, une ressource → USE, une vue plateforme → Golden Signals.
+2. Conventions et organisation
+Nommage (à figer dès le départ, c'est ingrat à corriger après) :
+
+Dashboards : <scope>-<composant>-<vue> → ex. svc-order-service-overview, infra-postgres-overview, biz-orders-funnel.
+Métriques Prometheus : snake_case, suffixe d'unité (_seconds, _bytes, _total pour les counters).
+Labels obligatoires partout : env (prod/staging), service, instance, version. Évite les labels à forte cardinalité (user_id, order_id → explosion de séries temporelles).
+
+Organisation des dossiers Grafana :
+├── 00 - Platform Overview
+├── 10 - API Gateway
+├── 20 - Services
+│   ├── User Service
+│   ├── Product Service
+│   ├── Order Service
+│   └── Notification Service
+├── 30 - Data Layer
+│   ├── PostgreSQL
+│   ├── Redis
+│   ├── RabbitMQ
+│   └── MailHog
+├── 40 - Infrastructure
+├── 50 - Business / KPIs
+├── 60 - SLO / SLA
+└── 90 - Alerting
+Variables (templating) à mettre sur tous les dashboards :
+
+$env, $datasource, $instance, $service, $interval (auto avec $__rate_interval).
+Permet de réutiliser un même dashboard pour plusieurs environnements/instances.
+
+Bonnes pratiques visuelles :
+
+Time range par défaut : now-1h pour les opérationnels, now-24h pour les overviews, now-30d pour les SLO.
+Refresh : 30s pour le live, 5m pour les vues business.
+Couleurs cohérentes : vert = OK, jaune = warn, rouge = critique. Définir des thresholds sur chaque panel.
+Unités correctes (s, ms, bytes, percent) — Grafana l'affiche très mal sinon.
+Légendes courtes : {{instance}} plutôt que la query complète.
+Annotations sur les déploiements (via webhook CI/CD) pour corréler incidents et releases.
+
+Liens entre dashboards (drill-down) :
+
+Overview → service → host → conteneur. Utiliser les data links Grafana pour passer les variables ($service, $instance).
+
+Versioning :
+
+Provisioning as code via JSON exportés + Git. Ne jamais modifier en prod sans commit.
+Outils : Grafana provisioning, Grafonnet (Jsonnet), ou Terraform provider Grafana.
+
+Sécurité :
+
+RBAC par dossier (Dev = view, SRE = edit, Admin = admin).
+Datasources Prometheus en read-only pour les comptes utilisateurs.
+
+
+3. Liste exhaustive des dashboards à créer
+🟦 Dashboard 1 — Platform Overview (executive)
+Objectif : une seule page pour savoir si "ça tourne" (NOC/management).
+Contenu :
+
+Stat panels : nombre de services UP/DOWN, requêtes/s globales, taux d'erreur global, latence p95 globale.
+Heatmap de santé par service (vert/jaune/rouge basé sur les SLO).
+Top 5 endpoints les plus lents.
+Top 5 endpoints les plus en erreur.
+État des dépendances (PG, Redis, RabbitMQ, MailHog) en stat panel coloré.
+Annotations de déploiement.
+
+🟦 Dashboard 2 — API Gateway
+Objectif : monitorer le point d'entrée unique.
+Contenu :
+
+Trafic : req/s par route, par méthode HTTP, par client (web/mobile/admin).
+Latence : p50, p95, p99 par route (heatmap recommandée).
+Erreurs : taux 4xx vs 5xx par route, top 10 routes en erreur.
+Auth (JWT) : taux de tokens invalides/expirés, taux de refresh.
+Rate limiting : nombre de requêtes throttlées (429), top IPs/clients limités.
+CORS : nombre de preflight OPTIONS, rejets CORS.
+Connexions : connexions actives, taux d'établissement.
+Backends downstream : latence et taux d'erreur par service appelé.
+
+🟦 Dashboards 3-6 — Un par microservice (User, Product, Order, Notification)
+Template commun (RED + dépendances) :
+
+Rate : req/s par endpoint, par méthode.
+Errors : taux d'erreur par endpoint, ventilation par code HTTP.
+Duration : histogramme/heatmap des latences, p50/p95/p99.
+Saturation : CPU, RAM, GC pauses, threads actifs, file descriptors.
+Runtime spécifique (Node.js : event loop lag, heap ; Java : GC, heap ; Go : goroutines).
+Dépendances sortantes : appels DB (latence + erreurs), appels Redis, appels message broker, appels HTTP externes.
+Pool de connexions : utilisé/disponible vers PostgreSQL et Redis.
+Logs panel intégré (si Loki) filtré sur le service.
+
+Spécificités par service :
+
+User Service : taux de login success/fail, latence des opérations Auth, sessions actives, opérations JWT/sec.
+Product Service : hit rate du cache catalogue, requêtes de recherche/sec, taille du catalogue.
+Order Service : commandes/sec, taux de réussite, panier moyen, temps de traitement de bout en bout, transactions DB ouvertes.
+Notification Service : emails envoyés/sec, taux d'échec SMTP, taille de la file de notifications, latence d'envoi.
+
+🟧 Dashboard 7 — PostgreSQL
+Source : postgres_exporter.
+Contenu :
+
+Connexions : actives, idle, max, % d'utilisation du pool.
+Throughput : transactions/sec (commit vs rollback), tuples insert/update/delete/fetch.
+Latence : query duration p95, slow queries (>1s).
+Cache hit ratio : doit être > 99 % en prod.
+Locks : locks attendus, deadlocks, queries bloquées.
+Replication : lag de réplication (si replicas).
+Disk I/O : taille des bases, croissance, WAL généré/sec.
+Vacuum & bloat : dernier autovacuum par table, dead tuples, table bloat.
+Top queries : par temps cumulé (pg_stat_statements).
+Erreurs : connexions refusées, erreurs SQL.
+
+🟧 Dashboard 8 — Redis
+Source : redis_exporter.
+Contenu :
+
+Mémoire : used / max memory, ratio d'utilisation, fragmentation ratio.
+Throughput : commands/sec, ops par type (GET, SET, DEL).
+Cache : hit rate (keyspace_hits / (hits+misses)) — objectif > 90 %.
+Évictions & expirations : keys evicted/sec (alerte si > 0 sur LRU saturée).
+Latence : commands latency, slowlog.
+Connexions : clients connectés, blocked clients, connections rejected.
+Persistance : dernière sauvegarde RDB, AOF status.
+Replication (si Sentinel/Cluster) : lag, state.
+Keyspace : nombre de clés par DB, TTL distribution.
+
+🟧 Dashboard 9 — RabbitMQ
+Source : rabbitmq_exporter ou plugin Prometheus natif.
+Contenu :
+
+Queues : profondeur de chaque queue (messages ready/unacked), critique pour détecter le retard.
+Throughput : messages publish/sec, deliver/sec, ack/sec, redeliver/sec.
+Consumers : nombre par queue, taux de consommation.
+Connexions & channels : actifs, état.
+Exchanges : messages routés, unrouted (si > 0 → problème de binding).
+Mémoire & disque : node memory, disk free alarm.
+Cluster : état des nodes, partitions réseau.
+Dead letter queues : volume (alerte critique si grossit).
+Erreurs : channel errors, connection closed.
+
+🟧 Dashboard 10 — MailHog (ou serveur SMTP de prod)
+Contenu :
+
+Mails reçus/sec, mails en file.
+Taux d'échec SMTP.
+Latence de delivery.
+Taille de la mailbox MailHog (en dev/test) ou bounce rate/spam complaints en prod.
+
+🟪 Dashboard 11 — Infrastructure / Hosts
+Source : node_exporter.
+Contenu (par hôte, avec variable $instance) :
+
+CPU : usage par core, par mode (user/system/iowait), load average 1/5/15.
+Mémoire : utilisée, cache/buffer, swap usage.
+Disque : utilisation par filesystem, IOPS, latence I/O, % full (alerte à 80 %).
+Réseau : bande passante in/out par interface, paquets droppés, erreurs TCP retransmits.
+Système : nombre de processus, file descriptors, uptime.
+
+🟪 Dashboard 12 — Conteneurs / Orchestration (si Docker/K8s)
+Source : cAdvisor, kube-state-metrics.
+Contenu :
+
+Pods/containers running vs desired.
+CPU/RAM par container vs limits/requests.
+OOM kills, restarts par container (alerte si crashloop).
+Image pull errors.
+État des deployments, replicasets, pending pods.
+Persistent volumes : utilisation, état.
+
+🟨 Dashboard 13 — Business / KPIs
+Objectif : parler à la direction, pas aux ops.
+Contenu (à co-construire avec le métier) :
+
+Inscriptions/sec, utilisateurs actifs (DAU/MAU).
+Commandes passées, panier moyen, revenue/heure.
+Funnel de conversion : visite → produit vu → ajout panier → commande.
+Taux d'abandon de panier.
+Top produits vus/achetés.
+Notifications envoyées par type (email transactionnel, marketing).
+Comparaison J-1, J-7, J-30.
+
+🟩 Dashboard 14 — SLO / SLA
+Objectif : suivi des engagements de service.
+Contenu :
+
+Pour chaque SLI (ex. : latence p95 < 300 ms, dispo > 99.9 %) :
+
+Valeur courante vs objectif.
+Error budget restant sur 30 jours (gauge).
+Burn rate sur 1h et 6h (alerte si consommation rapide du budget).
+
+
+Tableau récapitulatif par service.
+Historique des incidents et impact sur le budget.
+
+🟥 Dashboard 15 — Logs & Errors (avec Loki)
+Contenu :
+
+Volume de logs/sec par service, par niveau (INFO/WARN/ERROR).
+Top exceptions/stack traces (groupées).
+Recherche full-text avec variables.
+Corrélation avec les pics de métriques (annotations partagées).
+Trace IDs cliquables → Tempo/Jaeger si tracing distribué.
+
+🟥 Dashboard 16 — Alerting Overview
+Contenu :
+
+Alertes actives (firing), ventilées par sévérité.
+Historique des alertes 24h / 7j.
+MTTR (Mean Time To Resolve) par service.
+Top alertes les plus fréquentes (à dé-bruiter).
+État d'Alertmanager : silences actifs, inhibitions.
+
+
+4. Recommandations transverses
+
+Commencer par les Golden Signals sur chaque service avant de raffiner. Mieux vaut 4 panels utiles que 40 panels jamais consultés.
+Un dashboard = un public. Ne pas mélanger une vue exec et une vue debug ingé.
+Ne pas tout grapher : chaque panel doit répondre à une question. Si tu ne sais pas quelle décision il déclenche, supprime-le.
+Alerter sur les symptômes, pas sur les causes (latence utilisateur > seuil, pas "CPU > 80 %"). Les causes vont sur les dashboards, pas dans Alertmanager.
+Tester les alertes : injecter des pannes (chaos engineering léger) pour valider que le dashboard rend visible le problème.
+Documenter chaque dashboard dans un panel "Text" en haut : à quoi il sert, qui le maintient, runbook lié.
+Exporter en JSON et versionner dans le repo d'infra. Code review obligatoire pour les modifs prod.
+Rétention Prometheus : 15j en local suffisent ; pour le long terme (SLO sur 30/90j), passer par Thanos, Cortex ou Mimir.
