@@ -1,6 +1,10 @@
 # Creates/updates Grafana dashboard ConfigMaps in the `ecommerce` namespace.
-# One ConfigMap per subfolder under grafana/dashboards/ → one Grafana folder per category.
+# One ConfigMap per subfolder under grafana/dashboards/ -> one Grafana folder per category.
 # Falls back to a single flat ConfigMap if no subfolders exist.
+#
+# Strategy: delete + recreate each ConfigMap directly from files.
+# This avoids the PowerShell string-encoding corruption that occurs when piping
+# kubectl stdout (UTF-8) through $OutputEncoding-mangled PS variables (ASCII default).
 #
 # Usage:
 #   .\scripts\apply-grafana-dashboards.ps1
@@ -10,20 +14,28 @@ param([switch]$Restart = $false)
 
 $ErrorActionPreference = "Stop"
 
-# Force UTF-8 for stdin/stdout pipes between PowerShell and kubectl.
-# Without this, Windows PowerShell 5.1 defaults $OutputEncoding to ASCII,
-# which mangles accented chars (é, è, à) into '?' inside the ConfigMap.
-$utf8NoBom = New-Object System.Text.UTF8Encoding $false
-$OutputEncoding              = $utf8NoBom
-[Console]::OutputEncoding    = $utf8NoBom
-[Console]::InputEncoding     = $utf8NoBom
-
 $repoRoot       = Split-Path -Parent $PSScriptRoot
 $dashboardsPath = Join-Path $repoRoot "grafana\dashboards"
 
 if (-not (Test-Path $dashboardsPath)) {
     Write-Host "[ERROR] Dashboards directory not found: $dashboardsPath" -ForegroundColor Red
     exit 1
+}
+
+function Apply-DashboardConfigMap {
+    param([string]$CmName, [System.IO.FileInfo[]]$Files, [string]$Namespace = "ecommerce")
+
+    [string[]]$fromFileArgs = @($Files | ForEach-Object { "--from-file=$($_.FullName)" })
+
+    # Delete if exists, then recreate directly from files.
+    # Never pipes file content through PowerShell strings, so UTF-8 chars are preserved.
+    & kubectl delete configmap $CmName -n $Namespace --ignore-not-found 2>&1 | Out-Null
+
+    & kubectl create configmap $CmName -n $Namespace @fromFileArgs
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  [ERROR] kubectl create failed for $CmName" -ForegroundColor Red
+        exit 1
+    }
 }
 
 # Collect subfolders (one per Grafana folder category)
@@ -36,13 +48,11 @@ if ($subfolders.Count -eq 0) {
         Write-Host "[WARN] No dashboard JSON files found." -ForegroundColor Yellow
         exit 0
     }
-    Write-Host "Building grafana-dashboards ConfigMap (flat) from $($files.Count) file(s)..." -ForegroundColor Cyan
-    [string[]]$fromFileArgs = @($files | ForEach-Object { "--from-file=$($_.FullName)" })
-    $yaml = & kubectl create configmap grafana-dashboards -n ecommerce @fromFileArgs --dry-run=client -o yaml
-    $yaml | & kubectl apply -f -
+    Write-Host "Applying grafana-dashboards ConfigMap (flat) from $($files.Count) file(s)..." -ForegroundColor Cyan
+    Apply-DashboardConfigMap -CmName "grafana-dashboards" -Files $files
 } else {
     # Structured mode: one ConfigMap per subfolder
-    Write-Host "Building Grafana dashboard ConfigMaps (structured - $($subfolders.Count) folder(s))..." -ForegroundColor Cyan
+    Write-Host "Applying Grafana dashboard ConfigMaps (structured - $($subfolders.Count) folder(s))..." -ForegroundColor Cyan
 
     foreach ($folder in $subfolders) {
         $files = Get-ChildItem -Path $folder.FullName -Filter *.json
@@ -55,26 +65,16 @@ if ($subfolders.Count -eq 0) {
         $cmName = "grafana-dashboards-" + ($folder.Name.ToLower() -replace '[^a-z0-9]', '-')
 
         Write-Host "  -> $cmName  ($($files.Count) dashboard(s): $($files.Name -join ', '))" -ForegroundColor Gray
-
-        [string[]]$fromFileArgs = @($files | ForEach-Object { "--from-file=$($_.FullName)" })
-        $yaml = & kubectl create configmap $cmName -n ecommerce @fromFileArgs --dry-run=client -o yaml
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "  [ERROR] Failed to build ConfigMap for $($folder.Name)" -ForegroundColor Red
-            exit 1
-        }
-        $yaml | & kubectl apply -f -
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "  [ERROR] kubectl apply failed for $cmName" -ForegroundColor Red
-            exit 1
-        }
+        Apply-DashboardConfigMap -CmName $cmName -Files $files
     }
-    Write-Host "[OK] All dashboard ConfigMaps applied." -ForegroundColor Green
 }
+
+Write-Host "[OK] All dashboard ConfigMaps applied." -ForegroundColor Green
 
 if ($Restart) {
     Write-Host "Restarting Grafana deployment..." -ForegroundColor Yellow
     kubectl rollout restart deployment/grafana -n ecommerce
-    kubectl rollout status  deployment/grafana -n ecommerce --timeout=60s
+    kubectl rollout status  deployment/grafana -n ecommerce --timeout=120s
     Write-Host "[OK] Grafana restarted." -ForegroundColor Green
 } else {
     Write-Host "     To apply changes: kubectl rollout restart deployment/grafana -n ecommerce" -ForegroundColor Gray
