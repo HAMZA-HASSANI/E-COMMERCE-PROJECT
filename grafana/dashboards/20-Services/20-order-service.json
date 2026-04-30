@@ -11,7 +11,7 @@
       "title": "", "type": "text"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "reqps", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}},
       "gridPos": {"h": 4, "w": 6, "x": 0, "y": 2}, "id": 2,
       "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "center", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
@@ -19,7 +19,7 @@
       "title": "Rate — req/s", "type": "stat"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "percentunit", "min": 0, "max": 1,
           "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.01}, {"color": "red", "value": 0.05}]}}},
       "gridPos": {"h": 4, "w": 6, "x": 6, "y": 2}, "id": 3,
@@ -28,7 +28,7 @@
       "title": "Errors — taux 5xx", "type": "stat"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "s",
           "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.5}, {"color": "red", "value": 2}]}}},
       "gridPos": {"h": 4, "w": 6, "x": 12, "y": 2}, "id": 4,
@@ -37,7 +37,7 @@
       "title": "Duration — p95", "type": "stat"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "unit": "ops",
           "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 0.001}]}}},
       "gridPos": {"h": 4, "w": 6, "x": 18, "y": 2}, "id": 5,
@@ -46,7 +46,7 @@
       "title": "Commandes créées/s", "type": "stat"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "reqps"}},
       "gridPos": {"h": 8, "w": 8, "x": 0, "y": 6}, "id": 6,
       "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
@@ -54,7 +54,7 @@
       "title": "Rate — req/s par endpoint", "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "reqps"}},
       "gridPos": {"h": 8, "w": 8, "x": 8, "y": 6}, "id": 7,
       "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
@@ -62,7 +62,7 @@
       "title": "Errors — codes 4xx/5xx", "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "s"}},
       "gridPos": {"h": 8, "w": 8, "x": 16, "y": 6}, "id": 8,
       "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
@@ -74,7 +74,7 @@
       "title": "Duration — p50 / p95 / p99", "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1, "spanNulls": false}, "unit": "short"}},
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14}, "id": 9,
       "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
@@ -82,7 +82,7 @@
       "title": "Commandes créées (par minute)", "type": "timeseries"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
       "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "spanNulls": false, "showPoints": "never"}, "unit": "bytes"}},
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14}, "id": 10,
       "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}},
@@ -96,6 +96,11 @@
   "refresh": "30s",
   "schemaVersion": 36,
   "tags": ["service", "RED", "order", "business"],
+  "templating": {
+    "list": [
+      {"current": {}, "hide": 0, "name": "datasource", "query": "prometheus", "refresh": 1, "type": "datasource", "label": "Datasource"}
+    ]
+  },
   "time": {"from": "now-1h", "to": "now"},
   "timepicker": {},
   "timezone": "browser",

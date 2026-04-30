@@ -10,6 +10,14 @@ param([switch]$Restart = $false)
 
 $ErrorActionPreference = "Stop"
 
+# Force UTF-8 for stdin/stdout pipes between PowerShell and kubectl.
+# Without this, Windows PowerShell 5.1 defaults $OutputEncoding to ASCII,
+# which mangles accented chars (é, è, à) into '?' inside the ConfigMap.
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
+$OutputEncoding              = $utf8NoBom
+[Console]::OutputEncoding    = $utf8NoBom
+[Console]::InputEncoding     = $utf8NoBom
+
 $repoRoot       = Split-Path -Parent $PSScriptRoot
 $dashboardsPath = Join-Path $repoRoot "grafana\dashboards"
 
